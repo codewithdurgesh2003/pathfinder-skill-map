@@ -15,6 +15,7 @@ import Colleges from "./pages/Colleges";
 import About from "./pages/About";
 import Assessment from "./pages/Assessment";
 import NotFound404 from "./pages/NotFound404";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/index" element={<Index />} />
               <Route path="/assessment" element={<Assessment />} />
               <Route path="/registration" element={<Registration />} />
               <Route path="/aptitude-test" element={<AptitudeTest />} />

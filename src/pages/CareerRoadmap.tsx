@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,8 +17,8 @@ import {
   TrendingUp 
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { careers } from "@/data/careerData";
 
-// Mock roadmap data for different careers
 const roadmapData = {
   1: { // Software Developer
     title: "Software Developer Roadmap",
@@ -275,6 +274,102 @@ const roadmapData = {
   }
 };
 
+const getRoadmapByTitle = (title: string) => {
+  for (const [id, data] of Object.entries(roadmapData)) {
+    if (data.title.includes(title) || title.includes(data.title.replace(" Roadmap", ""))) {
+      return { id, data };
+    }
+  }
+  
+  return { 
+    id: "generic", 
+    data: {
+      title: `${title} Roadmap`,
+      description: `A comprehensive roadmap to become a successful ${title}.`,
+      steps: [
+        {
+          title: "Foundation (0-6 months)",
+          description: `Build your ${title} foundation`,
+          tasks: [
+            "Learn fundamental concepts and theories",
+            "Develop basic skills through practice",
+            "Study industry standards and best practices",
+            "Build a learning network",
+            "Create small projects to practice your skills"
+          ]
+        },
+        {
+          title: "Skill Development (6-12 months)",
+          description: "Enhance your professional skills",
+          tasks: [
+            "Deepen knowledge in specialized areas",
+            "Take advanced courses or training",
+            "Gain practical experience through internships or projects",
+            "Develop professional portfolio",
+            "Begin networking with professionals in the field"
+          ]
+        },
+        {
+          title: "Professional Growth (1-2 years)",
+          description: "Grow as a professional",
+          tasks: [
+            "Find entry-level positions or freelance opportunities",
+            "Join professional organizations",
+            "Attend conferences and workshops",
+            "Stay updated with industry trends",
+            "Seek mentorship from experienced professionals"
+          ]
+        },
+        {
+          title: "Career Advancement (2+ years)",
+          description: "Advance your career",
+          tasks: [
+            "Develop leadership and management skills",
+            "Specialize in high-demand areas",
+            "Consider advanced degrees or certifications",
+            "Build your professional brand",
+            "Mentor others and contribute to the field"
+          ]
+        }
+      ],
+      resources: [
+        {
+          name: "Professional Association",
+          url: "https://example.com/association",
+          type: "Professional Network"
+        },
+        {
+          name: "Online Learning Platform",
+          url: "https://example.com/learning",
+          type: "Learning Resource"
+        },
+        {
+          name: "Industry Journal",
+          url: "https://example.com/journal",
+          type: "Publication"
+        },
+        {
+          name: "Career Development",
+          url: "https://example.com/career",
+          type: "Career Resource"
+        },
+        {
+          name: "Professional Forum",
+          url: "https://example.com/forum",
+          type: "Community"
+        }
+      ],
+      certifications: [
+        "Professional Certificate in the field",
+        "Specialized Skill Certification",
+        "Advanced Practice Credential",
+        "Industry-Specific Qualification",
+        "Leadership and Management Certification"
+      ]
+    }
+  };
+};
+
 const CareerRoadmap = () => {
   const navigate = useNavigate();
   const { careerId } = useParams();
@@ -284,7 +379,7 @@ const CareerRoadmap = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!careerId || !roadmapData[Number(careerId) as keyof typeof roadmapData]) {
+    if (!careerId) {
       toast({
         title: "Error",
         description: "Career roadmap not found.",
@@ -294,20 +389,64 @@ const CareerRoadmap = () => {
       return;
     }
 
-    // Get selected career from localStorage
-    const selectedCareer = localStorage.getItem("selectedCareer");
+    let selectedCareer = null;
+    try {
+      const storedCareer = localStorage.getItem("selectedCareer");
+      if (storedCareer) {
+        selectedCareer = JSON.parse(storedCareer);
+      }
+    } catch (e) {
+      console.error("Error parsing stored career", e);
+    }
+
+    if (!selectedCareer) {
+      if (roadmapData[careerId as keyof typeof roadmapData]) {
+        const careerTitle = roadmapData[careerId as keyof typeof roadmapData].title.replace(" Roadmap", "");
+        selectedCareer = {
+          id: careerId,
+          title: careerTitle,
+          description: "Career path focused on " + careerTitle,
+          keySkills: ["Skill 1", "Skill 2", "Skill 3"],
+          educationPath: "Relevant degree or training",
+          growthOutlook: "Varies",
+          salaryRange: "Varies by experience and location",
+          industries: ["Industry 1", "Industry 2"],
+          matchPercentage: 80
+        };
+      } else {
+        const matchedCareer = careers.find(c => 
+          c.title.toLowerCase() === careerId.toLowerCase()
+        );
+        
+        if (matchedCareer) {
+          selectedCareer = {
+            title: matchedCareer.title,
+            requiredSkills: matchedCareer.requiredSkills,
+            description: "Career path focused on " + matchedCareer.title,
+            educationPath: "Relevant degree or training",
+            growthOutlook: "Varies",
+            salaryRange: "Varies by experience and location",
+            industries: ["Industry 1", "Industry 2"],
+            matchPercentage: 80
+          };
+        }
+      }
+    }
+
     if (!selectedCareer) {
       toast({
         title: "Error",
-        description: "Please select a career first.",
+        description: "Career information not found.",
         variant: "destructive",
       });
       navigate("/career-recommendations");
       return;
     }
 
-    setCareer(JSON.parse(selectedCareer));
-    setRoadmap(roadmapData[Number(careerId) as keyof typeof roadmapData]);
+    setCareer(selectedCareer);
+    
+    const { id, data } = getRoadmapByTitle(selectedCareer.title);
+    setRoadmap(data);
     setIsLoading(false);
   }, [careerId, navigate, toast]);
 
@@ -316,7 +455,6 @@ const CareerRoadmap = () => {
       title: "Roadmap Downloaded",
       description: "Your career roadmap has been downloaded successfully.",
     });
-    // In a real app, we would generate a PDF and download it
   };
 
   if (isLoading) {
@@ -339,8 +477,8 @@ const CareerRoadmap = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold gradient-heading">{roadmap.title}</h1>
-            <p className="text-career-gray mt-2">{roadmap.description}</p>
+            <h1 className="text-3xl font-bold gradient-heading">{roadmap?.title || 'Career Roadmap'}</h1>
+            <p className="text-career-gray mt-2">{roadmap?.description || 'Loading roadmap...'}</p>
           </div>
           <Button 
             onClick={downloadRoadmap}
@@ -363,7 +501,9 @@ const CareerRoadmap = () => {
                     <Award className="h-5 w-5 text-career-purple mt-0.5" />
                     <div>
                       <p className="font-medium">Key Skills</p>
-                      <p className="text-sm text-gray-600">{career.keySkills.join(", ")}</p>
+                      <p className="text-sm text-gray-600">
+                        {career.keySkills ? career.keySkills.join(", ") : career.requiredSkills.join(", ")}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">

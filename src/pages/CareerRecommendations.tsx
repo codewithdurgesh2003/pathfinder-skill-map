@@ -1,47 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, Award, BookOpen, Briefcase, Building, Star, TrendingUp } from "lucide-react";
-
-// Mock career recommendations data
-const mockCareers = [
-  {
-    id: 1,
-    title: "Software Developer",
-    description: "Develop applications and systems using programming languages and development tools.",
-    keySkills: ["Programming", "Problem Solving", "Analytical Thinking", "Creativity"],
-    educationPath: "Computer Science or related degree, coding bootcamps, or self-taught with portfolio",
-    growthOutlook: "Very High",
-    salaryRange: "$70,000 - $150,000",
-    industries: ["Technology", "Finance", "Healthcare", "E-commerce"],
-    matchPercentage: 95,
-  },
-  {
-    id: 2,
-    title: "Data Scientist",
-    description: "Analyze and interpret complex data to help organizations make better decisions.",
-    keySkills: ["Mathematics", "Programming", "Statistics", "Research", "Communication"],
-    educationPath: "Statistics, Mathematics, Computer Science, or related quantitative field",
-    growthOutlook: "High",
-    salaryRange: "$80,000 - $160,000",
-    industries: ["Technology", "Finance", "Healthcare", "Retail", "Manufacturing"],
-    matchPercentage: 88,
-  },
-  {
-    id: 3,
-    title: "UX/UI Designer",
-    description: "Create intuitive, engaging user experiences for websites and applications.",
-    keySkills: ["Design", "Creativity", "Communication", "Problem Solving", "Empathy"],
-    educationPath: "Design, Human-Computer Interaction, or self-taught with portfolio",
-    growthOutlook: "High",
-    salaryRange: "$65,000 - $130,000",
-    industries: ["Technology", "Marketing", "E-commerce", "Entertainment"],
-    matchPercentage: 82,
-  },
-];
+import { getCareerRecommendations } from "@/services/careerRecommendationService";
 
 const CareerRecommendations = () => {
   const navigate = useNavigate();
@@ -65,9 +28,11 @@ const CareerRecommendations = () => {
     }
 
     // In a real app, we would fetch recommendations from the backend
-    // For now, use mock data
+    // For now, use our service with the user profile from localStorage
     setTimeout(() => {
-      setCareers(mockCareers);
+      const profile = JSON.parse(userProfile);
+      const recommendations = getCareerRecommendations(profile);
+      setCareers(recommendations);
       setIsLoading(false);
     }, 1500);
   }, [navigate, toast]);
@@ -111,7 +76,7 @@ const CareerRecommendations = () => {
 
         <div className="space-y-6">
           {careers.map((career) => (
-            <Card key={career.id} className="card-shadow">
+            <Card key={career.title} className="card-shadow">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div>
@@ -131,7 +96,7 @@ const CareerRecommendations = () => {
                       <Award className="h-5 w-5 text-career-purple mt-0.5" />
                       <div>
                         <p className="font-medium">Key Skills</p>
-                        <p className="text-sm text-gray-600">{career.keySkills.join(", ")}</p>
+                        <p className="text-sm text-gray-600">{career.requiredSkills.join(", ")}</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-2">
@@ -169,7 +134,7 @@ const CareerRecommendations = () => {
               </CardContent>
               <CardFooter className="border-t pt-4">
                 <Button 
-                  onClick={() => viewRoadmap(career.id)}
+                  onClick={() => viewRoadmap(career.id || career.title)}
                   className="bg-career-purple hover:bg-career-blue transition-colors"
                 >
                   View Career Roadmap <ArrowRight className="ml-2 h-4 w-4" />

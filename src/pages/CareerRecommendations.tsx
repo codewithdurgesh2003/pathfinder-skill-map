@@ -1,17 +1,16 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Award, BookOpen, Briefcase, Building, Chart, Star, TrendingUp } from "lucide-react";
+import { ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, TrendingUp } from "lucide-react";
 import { 
   getCareerRecommendations, 
   analyzeRecommendations, 
   type CareerRecommendation 
 } from "@/services/careerRecommendationService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const CareerRecommendations = () => {
   const navigate = useNavigate();
@@ -264,7 +263,7 @@ const CareerRecommendations = () => {
                   <CardContent>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
+                        <RechartsBarChart
                           data={barChartData}
                           margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                         >
@@ -272,7 +271,7 @@ const CareerRecommendations = () => {
                           <YAxis />
                           <Tooltip formatter={(value) => [`${value} careers require this skill`, ""]} />
                           <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
+                        </RechartsBarChart>
                       </ResponsiveContainer>
                     </div>
                   </CardContent>
@@ -287,7 +286,7 @@ const CareerRecommendations = () => {
                     <ul className="space-y-2">
                       {analysis.suggestedCourses.map((course: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <Chart className="h-5 w-5 text-career-purple mt-0.5" />
+                          <BarChart className="h-5 w-5 text-career-purple mt-0.5" />
                           <span>{course}</span>
                         </li>
                       ))}

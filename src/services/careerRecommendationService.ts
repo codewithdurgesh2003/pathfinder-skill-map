@@ -1,115 +1,261 @@
 
 import { careers, Career } from "../data/careerData";
+import { recommendationWeights } from "../data/studentOptions";
 
-interface UserProfile {
+export interface UserProfile {
+  name?: string;
   skills: string[];
   interests: string[];
   sscPercentage: string;
   hscPercentage: string;
+  preferredWorkStyle?: "remote" | "office" | "hybrid";
 }
 
-interface CareerRecommendation extends Career {
+export interface CareerRecommendation extends Career {
   matchPercentage: number;
   description: string;
   educationPath: string;
   growthOutlook: string;
   salaryRange: string;
   industries: string[];
+  workEnvironment: string[];
 }
 
-// Sample career descriptions and additional data
+// Sample career details and additional data
 const careerDetails: Record<string, Omit<CareerRecommendation, 'title' | 'requiredSkills' | 'matchPercentage'>> = {
   "Journalist": {
     description: "Gather, verify, and present information as news, conducting interviews and investigations.",
     educationPath: "Bachelor's in Journalism, Communications, or related field",
     growthOutlook: "Moderate",
     salaryRange: "$45,000 - $90,000",
-    industries: ["Media", "Publishing", "Broadcasting", "Digital Content"]
+    industries: ["Media", "Publishing", "Broadcasting", "Digital Content"],
+    workEnvironment: ["Office", "Field", "Remote"]
   },
   "Writer/Author": {
     description: "Create content for various media including books, magazines, websites, and advertisements.",
     educationPath: "Bachelor's in English, Creative Writing, or related field",
     growthOutlook: "Moderate",
     salaryRange: "$40,000 - $85,000",
-    industries: ["Publishing", "Media", "Marketing", "Education"]
+    industries: ["Publishing", "Media", "Marketing", "Education"],
+    workEnvironment: ["Remote", "Freelance"]
   },
   "Historian": {
     description: "Research, analyze, interpret, and present the past through records, artifacts, and documents.",
     educationPath: "Master's or PhD in History or related field",
     growthOutlook: "Stable",
     salaryRange: "$55,000 - $95,000",
-    industries: ["Education", "Research", "Government", "Museums"]
+    industries: ["Education", "Research", "Government", "Museums"],
+    workEnvironment: ["Office", "Academic", "Field"]
   },
   "Sociologist": {
     description: "Study human society and social behavior by examining groups, cultures, organizations, and institutions.",
     educationPath: "Master's or PhD in Sociology or related field",
     growthOutlook: "Moderate",
     salaryRange: "$60,000 - $100,000",
-    industries: ["Research", "Education", "Government", "Non-profit"]
+    industries: ["Research", "Education", "Government", "Non-profit"],
+    workEnvironment: ["Academic", "Office", "Field"]
   },
   "Psychologist": {
     description: "Study cognitive, emotional, and social processes and behavior by observing and interpreting how people relate to one another and their environments.",
     educationPath: "Doctoral degree in Psychology; licensing required for clinical practice",
     growthOutlook: "High",
     salaryRange: "$70,000 - $130,000",
-    industries: ["Healthcare", "Education", "Government", "Private Practice"]
+    industries: ["Healthcare", "Education", "Government", "Private Practice"],
+    workEnvironment: ["Office", "Clinical", "Academic"]
   },
   "Political Scientist": {
     description: "Study the origin, development, and operation of political systems and public policy.",
     educationPath: "Master's or PhD in Political Science or related field",
     growthOutlook: "Moderate",
     salaryRange: "$65,000 - $115,000",
-    industries: ["Government", "Education", "Research", "Non-profit"]
+    industries: ["Government", "Education", "Research", "Non-profit"],
+    workEnvironment: ["Office", "Academic", "Remote"]
   },
   "Artist": {
     description: "Create original artwork using various mediums and techniques.",
     educationPath: "Bachelor's in Fine Arts or self-taught with portfolio",
     growthOutlook: "Competitive",
     salaryRange: "$35,000 - $80,000",
-    industries: ["Entertainment", "Advertising", "Digital Media", "Education"]
+    industries: ["Entertainment", "Advertising", "Digital Media", "Education"],
+    workEnvironment: ["Studio", "Freelance", "Remote"]
   }
   // Add more career details as needed
 };
 
-// Calculate match score between user skills and career required skills
+/**
+ * Calculate similarity score between two text strings
+ * This is a simple implementation of cosine similarity using term frequency
+ */
+const calculateTextSimilarity = (text1: string, text2: string): number => {
+  if (!text1 || !text2) return 0;
+  
+  // Convert to lowercase and split into words
+  const words1 = text1.toLowerCase().split(/\W+/);
+  const words2 = text2.toLowerCase().split(/\W+/);
+  
+  // Count word frequencies
+  const freq1: Record<string, number> = {};
+  const freq2: Record<string, number> = {};
+  
+  words1.forEach(word => {
+    if (word) freq1[word] = (freq1[word] || 0) + 1;
+  });
+  
+  words2.forEach(word => {
+    if (word) freq2[word] = (freq2[word] || 0) + 1;
+  });
+  
+  // Find intersection of words
+  const intersection = Object.keys(freq1).filter(word => freq2[word]);
+  
+  if (intersection.length === 0) return 0;
+  
+  // Calculate dot product
+  let dotProduct = 0;
+  intersection.forEach(word => {
+    dotProduct += freq1[word] * freq2[word];
+  });
+  
+  // Calculate magnitudes
+  const mag1 = Math.sqrt(Object.values(freq1).reduce((sum, val) => sum + val * val, 0));
+  const mag2 = Math.sqrt(Object.values(freq2).reduce((sum, val) => sum + val * val, 0));
+  
+  // Calculate cosine similarity
+  return dotProduct / (mag1 * mag2);
+};
+
+/**
+ * Calculate skill match score between user skills and career required skills
+ * Using a more advanced algorithm than simple matching
+ */
 const calculateSkillMatch = (userSkills: string[], careerSkills: string[]): number => {
   if (userSkills.length === 0 || careerSkills.length === 0) return 0;
   
-  let matchCount = 0;
+  // Calculate similarity scores for each user skill against each career skill
+  const similarityMatrix = userSkills.map(userSkill => 
+    careerSkills.map(careerSkill => 
+      calculateTextSimilarity(userSkill, careerSkill)
+    )
+  );
   
-  // Count how many of the user's skills match the career skills
-  for (const skill of userSkills) {
-    for (const careerSkill of careerSkills) {
-      if (careerSkill.toLowerCase().includes(skill.toLowerCase()) || 
-          skill.toLowerCase().includes(careerSkill.toLowerCase())) {
-        matchCount++;
-        break;
-      }
-    }
-  }
+  // Get the best match score for each user skill
+  const bestMatches = similarityMatrix.map(row => 
+    Math.max(...row)
+  );
   
-  // Calculate percentage based on user skills (how many of their skills match this career)
-  return Math.round((matchCount / userSkills.length) * 100);
+  // Average of best matches
+  const averageMatch = bestMatches.reduce((sum, score) => sum + score, 0) / bestMatches.length;
+  
+  // Convert to percentage
+  return Math.round(averageMatch * 100);
 };
 
-// Get career recommendations based on user profile
+/**
+ * Calculate interest match score based on career industries and user interests
+ */
+const calculateInterestMatch = (userInterests: string[], careerIndustries: string[]): number => {
+  if (userInterests.length === 0 || !careerIndustries || careerIndustries.length === 0) return 0;
+  
+  // Calculate similarity scores for each user interest against each career industry
+  const similarityMatrix = userInterests.map(interest => 
+    careerIndustries.map(industry => 
+      calculateTextSimilarity(interest, industry)
+    )
+  );
+  
+  // Get the best match score for each user interest
+  const bestMatches = similarityMatrix.map(row => 
+    Math.max(...row)
+  );
+  
+  // Average of best matches
+  const averageMatch = bestMatches.reduce((sum, score) => sum + score, 0) / bestMatches.length;
+  
+  // Convert to percentage
+  return Math.round(averageMatch * 100);
+};
+
+/**
+ * Calculate academic score based on SSC and HSC percentages
+ * This is a simplified approach - in a real ML system, we would train on historical data
+ */
+const calculateAcademicMatch = (sscPercentage: string, hscPercentage: string): number => {
+  const ssc = parseFloat(sscPercentage) || 0;
+  const hsc = parseFloat(hscPercentage) || 0;
+  
+  // Average of SSC and HSC scores, normalized to 100
+  const averageScore = (ssc + hsc) / 2;
+  
+  // Apply a curve - high scores get higher match percentages
+  // This is a simple sigmoid function to create a S-curve
+  const normalizedScore = 100 / (1 + Math.exp(-0.1 * (averageScore - 50)));
+  
+  return Math.round(normalizedScore);
+};
+
+/**
+ * Calculate work environment match based on user preference and career environments
+ */
+const calculateWorkEnvironmentMatch = (
+  preferredWorkStyle: "remote" | "office" | "hybrid" | undefined, 
+  careerEnvironments: string[]
+): number => {
+  if (!preferredWorkStyle || !careerEnvironments || careerEnvironments.length === 0) return 50;
+  
+  // Map user preference to potential environment keywords
+  const preferenceKeywords: Record<string, string[]> = {
+    remote: ["Remote", "Freelance", "Virtual", "Work from home"],
+    office: ["Office", "On-site", "Clinical", "Studio", "Field"],
+    hybrid: ["Remote", "Office", "Flexible"]
+  };
+  
+  const matchingKeywords = preferenceKeywords[preferredWorkStyle];
+  
+  // Count matching environments
+  const matches = careerEnvironments.filter(env => 
+    matchingKeywords.some(keyword => 
+      env.toLowerCase().includes(keyword.toLowerCase())
+    )
+  ).length;
+  
+  // Calculate percentage match
+  return Math.round((matches / careerEnvironments.length) * 100);
+};
+
+/**
+ * Get career recommendations based on user profile
+ * Using a weighted average of multiple factors
+ */
 export const getCareerRecommendations = (userProfile: UserProfile): CareerRecommendation[] => {
   const recommendations: CareerRecommendation[] = [];
   
   for (const career of careers) {
-    const matchPercentage = calculateSkillMatch(userProfile.skills, career.requiredSkills);
+    // Calculate individual match scores
+    const skillMatchScore = calculateSkillMatch(userProfile.skills, career.requiredSkills);
+    
+    // Get career details or use defaults
+    const details = careerDetails[career.title] || {
+      description: "No detailed description available.",
+      educationPath: "Varies based on specialization",
+      growthOutlook: "Varies",
+      salaryRange: "Varies by location and experience",
+      industries: ["Various"],
+      workEnvironment: ["Various"]
+    };
+    
+    const interestMatchScore = calculateInterestMatch(userProfile.interests, details.industries);
+    const academicMatchScore = calculateAcademicMatch(userProfile.sscPercentage, userProfile.hscPercentage);
+    const workEnvironmentScore = calculateWorkEnvironmentMatch(userProfile.preferredWorkStyle, details.workEnvironment);
+    
+    // Apply weighted average using predefined weights
+    const matchPercentage = Math.round(
+      (skillMatchScore * recommendationWeights.skillMatch) +
+      (interestMatchScore * recommendationWeights.interestMatch) +
+      (academicMatchScore * recommendationWeights.academicMatch)
+    );
     
     // Only include careers with at least 30% match
     if (matchPercentage >= 30) {
-      // Get additional career details or use defaults
-      const details = careerDetails[career.title] || {
-        description: "No detailed description available.",
-        educationPath: "Varies based on specialization",
-        growthOutlook: "Varies",
-        salaryRange: "Varies by location and experience",
-        industries: ["Various"]
-      };
-      
       recommendations.push({
         ...career,
         ...details,
@@ -120,4 +266,54 @@ export const getCareerRecommendations = (userProfile: UserProfile): CareerRecomm
   
   // Sort by match percentage (highest first)
   return recommendations.sort((a, b) => b.matchPercentage - a.matchPercentage);
+};
+
+// Function to analyze recommendation results and provide insights
+export const analyzeRecommendations = (recommendations: CareerRecommendation[]): {
+  topSkills: string[];
+  suggestedCourses: string[];
+  careerGroupings: Record<string, number>;
+} => {
+  // Extract all skills from top recommendations
+  const allSkills = recommendations.slice(0, 3).flatMap(career => career.requiredSkills);
+  
+  // Count skill frequencies
+  const skillCounts: Record<string, number> = {};
+  allSkills.forEach(skill => {
+    skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+  });
+  
+  // Get top skills
+  const topSkills = Object.entries(skillCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([skill]) => skill);
+  
+  // Generate suggested courses based on top skills
+  const suggestedCourses = topSkills.map(skill => {
+    switch(skill) {
+      case "Writing": return "Advanced Creative Writing";
+      case "Research": return "Research Methodology";
+      case "Communication": return "Effective Communication Skills";
+      case "Critical Thinking": return "Critical Thinking and Problem Solving";
+      case "Analytical Skills": return "Data Analysis and Interpretation";
+      case "Creativity": return "Creative Problem Solving";
+      case "Programming": return "Introduction to Programming";
+      default: return `${skill} Fundamentals`;
+    }
+  });
+  
+  // Group careers by industry
+  const careerGroupings: Record<string, number> = {};
+  recommendations.forEach(career => {
+    career.industries.forEach(industry => {
+      careerGroupings[industry] = (careerGroupings[industry] || 0) + 1;
+    });
+  });
+  
+  return {
+    topSkills,
+    suggestedCourses,
+    careerGroupings
+  };
 };

@@ -1,472 +1,161 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { 
+  ArrowLeft, 
   Award, 
   BookOpen, 
-  Briefcase, 
-  Building, 
-  Download, 
+  BriefcaseBusiness, 
+  Clock,
   GraduationCap, 
   Lightbulb, 
-  Link,
-  Map,
-  Star, 
-  TrendingUp 
+  ListChecks, 
+  School
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { careers } from "@/data/careerData";
 
-const roadmapData = {
-  1: { // Software Developer
-    title: "Software Developer Roadmap",
-    description: "A comprehensive roadmap to become a successful Software Developer.",
-    steps: [
-      {
-        title: "Foundation (0-6 months)",
-        description: "Build your programming foundation",
-        tasks: [
-          "Learn a programming language (Python, JavaScript, Java)",
-          "Master programming fundamentals (variables, loops, conditionals)",
-          "Study basic data structures and algorithms",
-          "Learn version control with Git",
-          "Create small projects to practice your skills"
-        ]
-      },
-      {
-        title: "Development Skills (6-12 months)",
-        description: "Enhance your development skills",
-        tasks: [
-          "Learn web development fundamentals (HTML, CSS, JavaScript)",
-          "Study a front-end framework (React, Angular, Vue)",
-          "Learn back-end development with a framework (Node.js, Django, Spring)",
-          "Master database concepts (SQL and NoSQL)",
-          "Build full-stack applications"
-        ]
-      },
-      {
-        title: "Specialization (1-2 years)",
-        description: "Specialize in your area of interest",
-        tasks: [
-          "Choose a specialization (web, mobile, AI, game development)",
-          "Study advanced concepts in your chosen area",
-          "Build complex projects that showcase your skills",
-          "Learn industry best practices for your specialization",
-          "Contribute to open source projects"
-        ]
-      },
-      {
-        title: "Professional Growth (2+ years)",
-        description: "Grow as a professional developer",
-        tasks: [
-          "Master software architecture patterns",
-          "Learn DevOps and CI/CD pipelines",
-          "Study system design and scalability",
-          "Improve code quality and testing practices",
-          "Mentor junior developers and lead projects"
-        ]
-      }
-    ],
-    resources: [
-      {
-        name: "freeCodeCamp",
-        url: "https://www.freecodecamp.org/",
-        type: "Learning Platform"
-      },
-      {
-        name: "The Odin Project",
-        url: "https://www.theodinproject.com/",
-        type: "Learning Path"
-      },
-      {
-        name: "LeetCode",
-        url: "https://leetcode.com/",
-        type: "Coding Practice"
-      },
-      {
-        name: "GitHub",
-        url: "https://github.com/",
-        type: "Version Control"
-      },
-      {
-        name: "Stack Overflow",
-        url: "https://stackoverflow.com/",
-        type: "Q&A Platform"
-      }
-    ],
-    certifications: [
-      "AWS Certified Developer",
-      "Microsoft Certified: Azure Developer Associate",
-      "Google Professional Cloud Developer",
-      "Oracle Certified Professional, Java SE Developer",
-      "Certified Kubernetes Application Developer (CKAD)"
-    ]
-  },
-  2: { // Data Scientist
-    title: "Data Scientist Roadmap",
-    description: "A step-by-step guide to becoming a proficient Data Scientist.",
-    steps: [
-      {
-        title: "Foundation (0-6 months)",
-        description: "Build your data science foundation",
-        tasks: [
-          "Learn a programming language (Python or R)",
-          "Master statistics and probability fundamentals",
-          "Study linear algebra and calculus basics",
-          "Learn data manipulation with Pandas/NumPy",
-          "Practice data visualization techniques"
-        ]
-      },
-      {
-        title: "Machine Learning Basics (6-12 months)",
-        description: "Learn machine learning fundamentals",
-        tasks: [
-          "Study supervised learning algorithms",
-          "Learn unsupervised learning techniques",
-          "Practice feature engineering",
-          "Master model evaluation metrics",
-          "Build end-to-end ML projects"
-        ]
-      },
-      {
-        title: "Advanced Techniques (1-2 years)",
-        description: "Specialize in advanced techniques",
-        tasks: [
-          "Study deep learning fundamentals",
-          "Learn natural language processing",
-          "Master computer vision techniques",
-          "Practice time series analysis",
-          "Study reinforcement learning"
-        ]
-      },
-      {
-        title: "Professional Growth (2+ years)",
-        description: "Grow as a professional data scientist",
-        tasks: [
-          "Master production ML systems",
-          "Learn MLOps practices",
-          "Study big data technologies",
-          "Develop expertise in a specific industry",
-          "Lead data science projects and mentor others"
-        ]
-      }
-    ],
-    resources: [
-      {
-        name: "Kaggle",
-        url: "https://www.kaggle.com/",
-        type: "Learning & Competition"
-      },
-      {
-        name: "DataCamp",
-        url: "https://www.datacamp.com/",
-        type: "Learning Platform"
-      },
-      {
-        name: "Towards Data Science",
-        url: "https://towardsdatascience.com/",
-        type: "Publication"
-      },
-      {
-        name: "Analytics Vidhya",
-        url: "https://www.analyticsvidhya.com/",
-        type: "Learning Resources"
-      },
-      {
-        name: "arXiv",
-        url: "https://arxiv.org/",
-        type: "Research Papers"
-      }
-    ],
-    certifications: [
-      "IBM Data Science Professional Certificate",
-      "Google Professional Data Engineer",
-      "Microsoft Certified: Azure Data Scientist Associate",
-      "TensorFlow Developer Certificate",
-      "AWS Certified Machine Learning - Specialty"
-    ]
-  },
-  3: { // UX/UI Designer
-    title: "UX/UI Designer Roadmap",
-    description: "A comprehensive guide to becoming a successful UX/UI Designer.",
-    steps: [
-      {
-        title: "Foundation (0-6 months)",
-        description: "Build your design foundation",
-        tasks: [
-          "Learn design fundamentals (color theory, typography, layout)",
-          "Master UI principles and patterns",
-          "Study UX research methods",
-          "Learn a design tool (Figma, Sketch, Adobe XD)",
-          "Build a small portfolio of redesigns"
-        ]
-      },
-      {
-        title: "Design Skills (6-12 months)",
-        description: "Enhance your design skills",
-        tasks: [
-          "Learn user research techniques",
-          "Master wireframing and prototyping",
-          "Study information architecture",
-          "Practice usability testing",
-          "Build end-to-end design projects"
-        ]
-      },
-      {
-        title: "Specialization (1-2 years)",
-        description: "Specialize in your area of interest",
-        tasks: [
-          "Choose a specialization (mobile, web, product design)",
-          "Learn interaction design patterns for your specialization",
-          "Study advanced prototyping techniques",
-          "Practice design systems creation",
-          "Build a professional portfolio"
-        ]
-      },
-      {
-        title: "Professional Growth (2+ years)",
-        description: "Grow as a professional designer",
-        tasks: [
-          "Master design strategy and leadership",
-          "Learn to collaborate with development teams",
-          "Study design operations (DesignOps)",
-          "Practice design critique and feedback",
-          "Lead design projects and mentor junior designers"
-        ]
-      }
-    ],
-    resources: [
-      {
-        name: "Dribbble",
-        url: "https://dribbble.com/",
-        type: "Design Inspiration"
-      },
-      {
-        name: "Behance",
-        url: "https://www.behance.net/",
-        type: "Portfolio Platform"
-      },
-      {
-        name: "Nielsen Norman Group",
-        url: "https://www.nngroup.com/",
-        type: "UX Research"
-      },
-      {
-        name: "Interaction Design Foundation",
-        url: "https://www.interaction-design.org/",
-        type: "Learning Platform"
-      },
-      {
-        name: "UX Collective",
-        url: "https://uxdesign.cc/",
-        type: "Publication"
-      }
-    ],
-    certifications: [
-      "Google UX Design Professional Certificate",
-      "Certified User Experience Professional (CUXP)",
-      "Certified Usability Analyst (CUA)",
-      "Interaction Design Foundation Certificates",
-      "Nielsen Norman Group UX Certification"
-    ]
-  }
-};
+interface Step {
+  title: string;
+  description: string;
+  duration: string;
+  prerequisites?: string[];
+  institution_types?: string[];
+}
 
-const getRoadmapByTitle = (title: string) => {
-  for (const [id, data] of Object.entries(roadmapData)) {
-    if (data.title.includes(title) || title.includes(data.title.replace(" Roadmap", ""))) {
-      return { id, data };
-    }
-  }
+interface RoadmapPhase {
+  title: string;
+  description: string;
+  steps: Step[];
+}
+
+const getRoadmapData = (careerId: string) => {
+  const career = careers.find(c => c.title === careerId);
   
-  return { 
-    id: "generic", 
-    data: {
-      title: `${title} Roadmap`,
-      description: `A comprehensive roadmap to become a successful ${title}.`,
-      steps: [
-        {
-          title: "Foundation (0-6 months)",
-          description: `Build your ${title} foundation`,
-          tasks: [
-            "Learn fundamental concepts and theories",
-            "Develop basic skills through practice",
-            "Study industry standards and best practices",
-            "Build a learning network",
-            "Create small projects to practice your skills"
-          ]
-        },
-        {
-          title: "Skill Development (6-12 months)",
-          description: "Enhance your professional skills",
-          tasks: [
-            "Deepen knowledge in specialized areas",
-            "Take advanced courses or training",
-            "Gain practical experience through internships or projects",
-            "Develop professional portfolio",
-            "Begin networking with professionals in the field"
-          ]
-        },
-        {
-          title: "Professional Growth (1-2 years)",
-          description: "Grow as a professional",
-          tasks: [
-            "Find entry-level positions or freelance opportunities",
-            "Join professional organizations",
-            "Attend conferences and workshops",
-            "Stay updated with industry trends",
-            "Seek mentorship from experienced professionals"
-          ]
-        },
-        {
-          title: "Career Advancement (2+ years)",
-          description: "Advance your career",
-          tasks: [
-            "Develop leadership and management skills",
-            "Specialize in high-demand areas",
-            "Consider advanced degrees or certifications",
-            "Build your professional brand",
-            "Mentor others and contribute to the field"
-          ]
-        }
-      ],
-      resources: [
-        {
-          name: "Professional Association",
-          url: "https://example.com/association",
-          type: "Professional Network"
-        },
-        {
-          name: "Online Learning Platform",
-          url: "https://example.com/learning",
-          type: "Learning Resource"
-        },
-        {
-          name: "Industry Journal",
-          url: "https://example.com/journal",
-          type: "Publication"
-        },
-        {
-          name: "Career Development",
-          url: "https://example.com/career",
-          type: "Career Resource"
-        },
-        {
-          name: "Professional Forum",
-          url: "https://example.com/forum",
-          type: "Community"
-        }
-      ],
-      certifications: [
-        "Professional Certificate in the field",
-        "Specialized Skill Certification",
-        "Advanced Practice Credential",
-        "Industry-Specific Qualification",
-        "Leadership and Management Certification"
-      ]
-    }
+  if (!career) return null;
+  
+  return {
+    career: career.title,
+    phases: [
+      {
+        title: "Education",
+        description: "Required educational qualifications",
+        steps: [
+          {
+            title: "High School",
+            description: "Complete high school with focus on relevant subjects",
+            duration: "3-4 years",
+            prerequisites: ["Basic education"],
+          },
+          {
+            title: "Bachelor's Degree",
+            description: `Undergraduate degree in fields related to ${career.title}`,
+            duration: "3-4 years",
+            prerequisites: ["High school diploma"],
+            institution_types: ["University", "College"]
+          },
+          {
+            title: "Master's Degree (Optional)",
+            description: "Advanced degree for specialization",
+            duration: "1-2 years",
+            prerequisites: ["Bachelor's degree"],
+            institution_types: ["University"]
+          }
+        ]
+      },
+      {
+        title: "Skill Development",
+        description: "Essential skills to develop",
+        steps: career.requiredSkills.map(skill => ({
+          title: skill,
+          description: `Develop proficiency in ${skill}`,
+          duration: "Ongoing",
+          prerequisites: []
+        }))
+      },
+      {
+        title: "Career Progression",
+        description: "Typical career path",
+        steps: [
+          {
+            title: "Entry Level",
+            description: `Junior ${career.title} role`,
+            duration: "1-3 years",
+            prerequisites: ["Bachelor's degree", ...career.requiredSkills.slice(0, 2)]
+          },
+          {
+            title: "Mid Level",
+            description: `Experienced ${career.title}`,
+            duration: "3-5 years",
+            prerequisites: ["Entry level experience"]
+          },
+          {
+            title: "Senior Level",
+            description: `Senior ${career.title} / Leadership role`,
+            duration: "5+ years",
+            prerequisites: ["Mid level experience", "Leadership skills"]
+          }
+        ]
+      }
+    ]
   };
 };
 
 const CareerRoadmap = () => {
   const navigate = useNavigate();
-  const { careerId } = useParams();
   const { toast } = useToast();
-  const [roadmap, setRoadmap] = useState<any>(null);
-  const [career, setCareer] = useState<any>(null);
+  const { careerId } = useParams<{ careerId: string }>();
+  const [activeTab, setActiveTab] = useState("education");
+  const [roadmapData, setRoadmapData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!careerId) {
       toast({
         title: "Error",
-        description: "Career roadmap not found.",
+        description: "Career ID not found.",
         variant: "destructive",
       });
       navigate("/career-recommendations");
       return;
     }
 
-    let selectedCareer = null;
-    try {
-      const storedCareer = localStorage.getItem("selectedCareer");
-      if (storedCareer) {
-        selectedCareer = JSON.parse(storedCareer);
+    setTimeout(() => {
+      const data = getRoadmapData(careerId);
+      if (!data) {
+        toast({
+          title: "Error",
+          description: "Career roadmap not found.",
+          variant: "destructive",
+        });
+        navigate("/career-recommendations");
+        return;
       }
-    } catch (e) {
-      console.error("Error parsing stored career", e);
-    }
-
-    if (!selectedCareer) {
-      if (roadmapData[careerId as keyof typeof roadmapData]) {
-        const careerTitle = roadmapData[careerId as keyof typeof roadmapData].title.replace(" Roadmap", "");
-        selectedCareer = {
-          id: careerId,
-          title: careerTitle,
-          description: "Career path focused on " + careerTitle,
-          keySkills: ["Skill 1", "Skill 2", "Skill 3"],
-          educationPath: "Relevant degree or training",
-          growthOutlook: "Varies",
-          salaryRange: "Varies by experience and location",
-          industries: ["Industry 1", "Industry 2"],
-          matchPercentage: 80
-        };
-      } else {
-        const matchedCareer = careers.find(c => 
-          c.title.toLowerCase() === careerId.toLowerCase()
-        );
-        
-        if (matchedCareer) {
-          selectedCareer = {
-            title: matchedCareer.title,
-            requiredSkills: matchedCareer.requiredSkills,
-            description: "Career path focused on " + matchedCareer.title,
-            educationPath: "Relevant degree or training",
-            growthOutlook: "Varies",
-            salaryRange: "Varies by experience and location",
-            industries: ["Industry 1", "Industry 2"],
-            matchPercentage: 80
-          };
-        }
-      }
-    }
-
-    if (!selectedCareer) {
-      toast({
-        title: "Error",
-        description: "Career information not found.",
-        variant: "destructive",
-      });
-      navigate("/career-recommendations");
-      return;
-    }
-
-    setCareer(selectedCareer);
-    
-    const { id, data } = getRoadmapByTitle(selectedCareer.title);
-    setRoadmap(data);
-    setIsLoading(false);
+      setRoadmapData(data);
+      setIsLoading(false);
+    }, 1000);
   }, [careerId, navigate, toast]);
-
-  const downloadRoadmap = () => {
-    toast({
-      title: "Roadmap Downloaded",
-      description: "Your career roadmap has been downloaded successfully.",
-    });
-  };
 
   if (isLoading) {
     return (
       <div className="container mx-auto py-20 px-4 text-center">
         <div className="max-w-lg mx-auto">
-          <h2 className="text-2xl font-bold mb-6 gradient-heading">Loading Roadmap</h2>
+          <h2 className="text-2xl font-bold mb-6 gradient-heading">Loading Career Roadmap</h2>
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-career-lightpurple rounded w-3/4 mx-auto"></div>
             <div className="h-4 bg-career-lightblue rounded w-full mx-auto"></div>
             <div className="h-4 bg-career-lightpurple rounded w-5/6 mx-auto"></div>
           </div>
+          <p className="mt-6 text-career-gray">
+            Please wait while we prepare your personalized career roadmap...
+          </p>
         </div>
       </div>
     );
@@ -475,181 +164,124 @@ const CareerRoadmap = () => {
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold gradient-heading">{roadmap?.title || 'Career Roadmap'}</h1>
-            <p className="text-career-gray mt-2">{roadmap?.description || 'Loading roadmap...'}</p>
-          </div>
-          <Button 
-            onClick={downloadRoadmap}
-            className="bg-career-purple hover:bg-career-blue transition-colors"
-          >
-            <Download className="mr-2 h-4 w-4" /> Download Roadmap
-          </Button>
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/career-recommendations")}
+          className="mb-6"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Recommendations
+        </Button>
+
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold mb-3 gradient-heading">
+            {roadmapData.career} Roadmap
+          </h1>
+          <p className="text-career-gray max-w-2xl mx-auto">
+            Your personalized path to becoming a successful {roadmapData.career}. Follow this roadmap to develop the necessary skills and qualifications.
+          </p>
         </div>
 
-        {career && (
-          <Card className="mb-8">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl text-career-blue">Career Overview: {career.title}</CardTitle>
-              <CardDescription className="text-base">{career.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-2">
-                    <Award className="h-5 w-5 text-career-purple mt-0.5" />
-                    <div>
-                      <p className="font-medium">Key Skills</p>
-                      <p className="text-sm text-gray-600">
-                        {career.keySkills ? career.keySkills.join(", ") : career.requiredSkills.join(", ")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <BookOpen className="h-5 w-5 text-career-purple mt-0.5" />
-                    <div>
-                      <p className="font-medium">Education Path</p>
-                      <p className="text-sm text-gray-600">{career.educationPath}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-2">
-                    <TrendingUp className="h-5 w-5 text-career-blue mt-0.5" />
-                    <div>
-                      <p className="font-medium">Growth Outlook</p>
-                      <p className="text-sm text-gray-600">{career.growthOutlook}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <Briefcase className="h-5 w-5 text-career-blue mt-0.5" />
-                    <div>
-                      <p className="font-medium">Salary Range</p>
-                      <p className="text-sm text-gray-600">{career.salaryRange}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as string)}>
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="education" className="text-career-blue">
+              <GraduationCap className="mr-2 h-4 w-4" /> Education
+            </TabsTrigger>
+            <TabsTrigger value="skills" className="text-career-purple">
+              <Lightbulb className="mr-2 h-4 w-4" /> Skills
+            </TabsTrigger>
+            <TabsTrigger value="career" className="text-career-green">
+              <BriefcaseBusiness className="mr-2 h-4 w-4" /> Career Path
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Map className="h-6 w-6 text-career-purple mr-2" />
-            <h2 className="text-2xl font-semibold">Development Path</h2>
-          </div>
-          
-          <div className="space-y-6">
-            {roadmap.steps.map((step: any, index: number) => (
-              <div key={index} className="relative">
-                <div className="flex">
-                  <div className="flex flex-col items-center mr-4">
-                    <div className="w-10 h-10 rounded-full bg-career-purple text-white flex items-center justify-center font-bold">
-                      {index + 1}
-                    </div>
-                    {index < roadmap.steps.length - 1 && (
-                      <div className="h-full w-0.5 bg-career-lightpurple mt-2 mb-2" />
-                    )}
-                  </div>
-                  <div className="bg-white rounded-lg border p-5 shadow-sm flex-1">
-                    <h3 className="text-lg font-semibold text-career-blue">{step.title}</h3>
-                    <p className="text-career-gray mb-4">{step.description}</p>
-                    <ul className="space-y-2">
-                      {step.tasks.map((task: string, taskIndex: number) => (
-                        <li key={taskIndex} className="flex items-start">
-                          <div className="w-5 h-5 rounded-full bg-career-lightblue text-career-blue flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">
-                            {taskIndex + 1}
+          {roadmapData.phases.map((phase: RoadmapPhase, index: number) => (
+            <TabsContent key={index} value={phase.title.toLowerCase()}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-xl">
+                    {index === 0 && <GraduationCap className="mr-2 h-5 w-5 text-career-blue" />}
+                    {index === 1 && <Lightbulb className="mr-2 h-5 w-5 text-career-purple" />}
+                    {index === 2 && <BriefcaseBusiness className="mr-2 h-5 w-5 text-career-green" />}
+                    {phase.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-8">
+                    {phase.steps.map((step, stepIndex) => (
+                      <div key={stepIndex} className="relative pl-8">
+                        {stepIndex < phase.steps.length - 1 && (
+                          <div className="absolute left-4 top-8 h-full w-0.5 bg-gray-200"></div>
+                        )}
+                        <div className="absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-career-lightblue">
+                          <span className="text-sm font-medium text-career-blue">{stepIndex + 1}</span>
+                        </div>
+                        <div className="pt-1">
+                          <h3 className="text-lg font-semibold">{step.title}</h3>
+                          <p className="text-career-gray mt-1">{step.description}</p>
+                          
+                          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-start space-x-2">
+                              <Clock className="h-5 w-5 text-career-purple mt-0.5" />
+                              <div>
+                                <p className="font-medium text-sm">Duration</p>
+                                <p className="text-sm text-gray-600">{step.duration}</p>
+                              </div>
+                            </div>
+                            
+                            {step.prerequisites && step.prerequisites.length > 0 && (
+                              <div className="flex items-start space-x-2">
+                                <ListChecks className="h-5 w-5 text-career-blue mt-0.5" />
+                                <div>
+                                  <p className="font-medium text-sm">Prerequisites</p>
+                                  <p className="text-sm text-gray-600">
+                                    {step.prerequisites.join(", ")}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {step.institution_types && step.institution_types.length > 0 && (
+                              <div className="flex items-start space-x-2">
+                                <School className="h-5 w-5 text-career-green mt-0.5" />
+                                <div>
+                                  <p className="font-medium text-sm">Institution Types</p>
+                                  <p className="text-sm text-gray-600">
+                                    {step.institution_types.join(", ")}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <span>{task}</span>
-                        </li>
-                      ))}
-                    </ul>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Link className="h-5 w-5 text-career-purple mr-2" />
-                Recommended Resources
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {roadmap.resources.map((resource: any, index: number) => (
-                  <li key={index} className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-career-lightblue flex items-center justify-center mr-3">
-                      <Link className="h-4 w-4 text-career-blue" />
-                    </div>
-                    <div>
-                      <a 
-                        href={resource.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="font-medium text-career-blue hover:underline"
-                      >
-                        {resource.name}
-                      </a>
-                      <p className="text-sm text-gray-600">{resource.type}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Award className="h-5 w-5 text-career-purple mr-2" />
-                Recommended Certifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {roadmap.certifications.map((certification: string, index: number) => (
-                  <li key={index} className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-career-lightpurple flex items-center justify-center mr-3">
-                      <GraduationCap className="h-4 w-4 text-career-purple" />
-                    </div>
-                    <div className="pt-1">
-                      <span>{certification}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="bg-career-lightblue p-6 rounded-lg border border-career-blue mb-8">
-          <div className="flex items-start">
-            <Lightbulb className="h-6 w-6 text-career-blue mr-3 mt-0.5" />
+        <div className="mt-10 bg-career-lightpurple rounded-lg p-6">
+          <div className="flex items-start space-x-4">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mt-1">
+              <Award className="h-5 w-5 text-career-purple" />
+            </div>
             <div>
-              <h3 className="text-lg font-semibold text-career-blue mb-2">Pro Tip</h3>
-              <p className="text-gray-700">
-                While following this roadmap, focus on building practical projects that demonstrate your skills. 
-                A strong portfolio is often more valuable than certifications alone. Consider joining communities related 
-                to your field to network and keep up with industry trends.
+              <h3 className="text-lg font-semibold text-career-purple">Success Tips</h3>
+              <p className="text-gray-700 mt-2">
+                Build a strong portfolio showcasing your skills and projects. Network with professionals in the field by attending industry events and joining relevant online communities. Consider finding a mentor who can provide guidance and introduce you to opportunities.
               </p>
+              <div className="mt-4">
+                <Button 
+                  onClick={() => navigate("/colleges")}
+                  className="bg-career-purple hover:bg-career-blue transition-colors"
+                >
+                  <BookOpen className="mr-2 h-4 w-4" /> Browse Relevant Colleges
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="text-center">
-          <Button 
-            onClick={() => navigate("/colleges")}
-            className="bg-career-purple hover:bg-career-blue transition-colors"
-          >
-            Find Colleges for This Career
-          </Button>
         </div>
       </div>
     </div>

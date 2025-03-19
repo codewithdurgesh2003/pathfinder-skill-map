@@ -34,5 +34,40 @@ export const careers: Career[] = [
     title: "Artist",
     requiredSkills: ["Creativity", "Artistic Skills", "Attention to Detail", "Patience", "Observation"],
   },
-  // You can add more career data from your CSV here
+  {
+    title: "Software Developer",
+    requiredSkills: ["Computer Programming", "Algorithms", "Problem Solving", "Data Structures", "Software Engineering"],
+  },
+  {
+    title: "Data Scientist",
+    requiredSkills: ["Data Analysis", "Machine Learning", "Statistics", "Mathematics", "Programming"],
+  },
+  {
+    title: "Cybersecurity Analyst",
+    requiredSkills: ["Cybersecurity", "Network Security", "Ethical Hacking", "Problem Solving", "Analytical Skills"],
+  },
+  {
+    title: "Cloud Architect",
+    requiredSkills: ["Cloud Computing", "Network Administration", "DevOps", "Programming", "System Design"],
+  },
+  {
+    title: "AI Engineer",
+    requiredSkills: ["AI Development", "Machine Learning", "Programming", "Data Structures", "Mathematics"],
+  },
+  {
+    title: "Web Developer",
+    requiredSkills: ["Web Development", "Programming", "UI/UX", "Problem Solving", "Communication"],
+  },
+  {
+    title: "Healthcare Administrator",
+    requiredSkills: ["Healthcare Management", "Communication", "Leadership", "Problem Solving", "Analytical Skills"],
+  },
+  {
+    title: "Medical Researcher",
+    requiredSkills: ["Research", "Biomedical Engineering", "Data Analysis", "Analytical Skills", "Problem Solving"],
+  },
+  {
+    title: "Financial Analyst",
+    requiredSkills: ["Economics", "Business Analysis", "Mathematics", "Communication", "Analytical Skills"],
+  }
 ];

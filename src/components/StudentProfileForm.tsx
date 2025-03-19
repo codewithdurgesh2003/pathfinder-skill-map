@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -143,7 +142,7 @@ const StudentProfileForm = ({ onSubmit }: StudentProfileFormProps) => {
               <div className="mb-4">
                 <FormLabel className="text-base">Skills</FormLabel>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-80 overflow-y-auto">
                 {skillOptions.map((skill) => (
                   <FormField
                     key={skill}
@@ -191,7 +190,7 @@ const StudentProfileForm = ({ onSubmit }: StudentProfileFormProps) => {
               <div className="mb-4">
                 <FormLabel className="text-base">Interests</FormLabel>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-80 overflow-y-auto">
                 {interestOptions.map((interest) => (
                   <FormField
                     key={interest}

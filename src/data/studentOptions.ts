@@ -14,6 +14,7 @@ export const skillOptions = [
   "Teamwork",
   "Public Speaking",
   "Programming",
+  "Computer Programming",
   "Data Analysis",
   "Artistic Skills",
   "Editing",
@@ -24,6 +25,30 @@ export const skillOptions = [
   "Observation",
   "Mathematics",
   "Design",
+  "Machine Learning",
+  "AI Development",
+  "Data Structures",
+  "Algorithms",
+  "Software Engineering",
+  "Web Development",
+  "Mobile Development",
+  "Cybersecurity",
+  "Network Security",
+  "Cloud Computing",
+  "DevOps",
+  "Database Management",
+  "Statistics",
+  "Biomedical Engineering",
+  "Healthcare Management",
+  "Economics",
+  "Business Analysis",
+  "Data Visualization",
+  "Network Administration",
+  "Nursing",
+  "Public Health",
+  "Public Speaking",
+  "Creative Writing",
+  "Music",
 ];
 
 // Available interests that students can select
@@ -51,11 +76,49 @@ export const interestOptions = [
   "Music",
   "Film",
   "Theatre",
+  "AI Development",
+  "Robotics",
+  "Ethical Hacking",
+  "System Security",
+  "Cybersecurity",
+  "Hacking",
+  "Research",
+  "Data Science",
+  "App Development",
+  "Coding",
+  "Game Development",
+  "Software Design",
+  "Machine Learning",
+  "IT Infrastructure",
+  "Server Management",
+  "Software Development",
+  "Tech Startups",
+  "App Design",
+  "UI/UX",
+  "Automation",
+  "AI Applications",
+  "Big Data",
+  "AI Research",
+  "Health Policy",
+  "Medical Research",
+  "Performing Arts",
+  "Cultural Studies",
+  "Community Service",
+  "Financial Markets",
+  "Consulting",
 ];
 
 // Student profile scoring weights for recommendation engine
 export const recommendationWeights = {
-  skillMatch: 0.6,      // 60% of the score comes from matching skills
+  skillMatch: 0.5,      // 50% of the score comes from matching skills
   interestMatch: 0.3,   // 30% from matching interests
-  academicMatch: 0.1    // 10% from academic performance
+  academicMatch: 0.1,   // 10% from academic performance
+  similarStudents: 0.1  // 10% from similar student profiles using kNN
+};
+
+// k-NN algorithm parameters
+export const knnConfig = {
+  k: 3,                 // Number of nearest neighbors to consider
+  contentWeight: 0.7,   // Weight for content-based similarity (skills/interests)
+  vectorWeight: 0.3     // Weight for vector-based similarity (academic/work style)
 };

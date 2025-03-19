@@ -1,6 +1,7 @@
-
 import { careers, Career } from "../data/careerData";
-import { recommendationWeights } from "../data/studentOptions";
+import { students, StudentData } from "../data/studentData";
+import { recommendationWeights, knnConfig } from "../data/studentOptions";
+import { findKNearestNeighbors, vectorizeProfile, calculateContentSimilarity } from "../utils/mlUtils";
 
 export interface UserProfile {
   name?: string;
@@ -78,8 +79,79 @@ const careerDetails: Record<string, Omit<CareerRecommendation, 'title' | 'requir
     salaryRange: "$35,000 - $80,000",
     industries: ["Entertainment", "Advertising", "Digital Media", "Education"],
     workEnvironment: ["Studio", "Freelance", "Remote"]
+  },
+  "Software Developer": {
+    description: "Design, build, and maintain software applications and systems.",
+    educationPath: "Bachelor's in Computer Science or related field; coding bootcamps",
+    growthOutlook: "High",
+    salaryRange: "$70,000 - $150,000",
+    industries: ["Technology", "Finance", "Healthcare", "E-commerce", "Entertainment"],
+    workEnvironment: ["Office", "Remote", "Hybrid"]
+  },
+  "Data Scientist": {
+    description: "Analyze complex data to help organizations make better decisions.",
+    educationPath: "Master's or PhD in Data Science, Statistics, Computer Science, or related field",
+    growthOutlook: "Very High",
+    salaryRange: "$90,000 - $180,000",
+    industries: ["Technology", "Finance", "Healthcare", "Research", "E-commerce"],
+    workEnvironment: ["Office", "Remote", "Hybrid"]
+  },
+  "Cybersecurity Analyst": {
+    description: "Protect computer systems and networks from security breaches and cyber threats.",
+    educationPath: "Bachelor's in Cybersecurity, Computer Science, or related field; certifications",
+    growthOutlook: "Very High",
+    salaryRange: "$75,000 - $160,000",
+    industries: ["Technology", "Finance", "Government", "Healthcare", "Defense"],
+    workEnvironment: ["Office", "Remote", "Hybrid"]
+  },
+  "Cloud Architect": {
+    description: "Design and implement cloud computing strategies for organizations.",
+    educationPath: "Bachelor's in Computer Science; cloud certifications; professional experience",
+    growthOutlook: "High",
+    salaryRange: "$110,000 - $200,000",
+    industries: ["Technology", "Consulting", "Finance", "Healthcare", "E-commerce"],
+    workEnvironment: ["Office", "Remote", "Hybrid"]
+  },
+  "AI Engineer": {
+    description: "Develop and deploy AI systems and algorithms for real-world applications.",
+    educationPath: "Master's or PhD in Computer Science, AI, or related field",
+    growthOutlook: "Very High",
+    salaryRange: "$100,000 - $200,000",
+    industries: ["Technology", "Research", "Finance", "Healthcare", "Robotics"],
+    workEnvironment: ["Office", "Research Lab", "Remote"]
+  },
+  "Web Developer": {
+    description: "Build and maintain websites and web applications.",
+    educationPath: "Bachelor's in Computer Science or related field; coding bootcamps; self-taught",
+    growthOutlook: "High",
+    salaryRange: "$60,000 - $130,000",
+    industries: ["Technology", "E-commerce", "Media", "Marketing", "Finance"],
+    workEnvironment: ["Office", "Remote", "Hybrid", "Freelance"]
+  },
+  "Healthcare Administrator": {
+    description: "Plan, direct, and coordinate medical and health services.",
+    educationPath: "Bachelor's or Master's in Healthcare Administration or related field",
+    growthOutlook: "High",
+    salaryRange: "$65,000 - $120,000",
+    industries: ["Healthcare", "Hospitals", "Clinics", "Public Health", "Insurance"],
+    workEnvironment: ["Office", "Medical Facilities"]
+  },
+  "Medical Researcher": {
+    description: "Conduct research to improve human health and advance medical knowledge.",
+    educationPath: "PhD or MD in relevant field",
+    growthOutlook: "Moderate",
+    salaryRange: "$80,000 - $150,000",
+    industries: ["Pharmaceuticals", "Research Institutions", "Universities", "Government", "Biotech"],
+    workEnvironment: ["Laboratory", "Research Institution", "Academic"]
+  },
+  "Financial Analyst": {
+    description: "Analyze financial data and provide guidance on investment decisions.",
+    educationPath: "Bachelor's in Finance, Economics, or related field; certifications",
+    growthOutlook: "Moderate",
+    salaryRange: "$65,000 - $130,000",
+    industries: ["Finance", "Banking", "Investment", "Consulting", "Corporate"],
+    workEnvironment: ["Office", "Remote", "Hybrid"]
   }
-  // Add more career details as needed
 };
 
 /**
@@ -223,11 +295,126 @@ const calculateWorkEnvironmentMatch = (
 };
 
 /**
+ * Find similar student profiles using k-NN algorithm
+ * Combines vector-based similarity with content-based similarity
+ */
+const findSimilarStudents = (userProfile: UserProfile, k = knnConfig.k): StudentData[] => {
+  // Prepare vector features for all students
+  const studentVectors = students.map(student => ({
+    vector: vectorizeProfile(student),
+    data: student
+  }));
+  
+  // Get user vector
+  const userVector = vectorizeProfile(userProfile);
+  
+  // Find k nearest neighbors based on vector similarity
+  const vectorNeighbors = findKNearestNeighbors(userVector, studentVectors, k);
+  
+  // Calculate content-based similarity for skills and interests
+  const contentSimilarities = students.map(student => {
+    const skillSimilarity = calculateContentSimilarity(userProfile.skills, student.skills);
+    const interestSimilarity = calculateContentSimilarity(userProfile.interests, student.interests);
+    
+    // Combined content similarity score
+    const contentScore = (skillSimilarity * 0.6) + (interestSimilarity * 0.4);
+    
+    return {
+      contentScore,
+      data: student
+    };
+  });
+  
+  // Sort by content similarity (descending)
+  const contentNeighbors = contentSimilarities
+    .sort((a, b) => b.contentScore - a.contentScore)
+    .slice(0, k);
+  
+  // Combine both approaches with weighted scoring
+  const combinedScores = new Map<string, {score: number, student: StudentData}>();
+  
+  // Add vector-based neighbors with their weights
+  vectorNeighbors.forEach((neighbor, index) => {
+    // Normalize by position (closer neighbors get higher weights)
+    const positionWeight = (k - index) / k;
+    const score = positionWeight * knnConfig.vectorWeight;
+    
+    combinedScores.set(neighbor.data.name, {
+      score,
+      student: neighbor.data
+    });
+  });
+  
+  // Add content-based neighbors with their weights
+  contentNeighbors.forEach((neighbor, index) => {
+    // Normalize by position
+    const positionWeight = (k - index) / k;
+    const score = positionWeight * knnConfig.contentWeight;
+    
+    const existing = combinedScores.get(neighbor.data.name);
+    if (existing) {
+      existing.score += score;
+    } else {
+      combinedScores.set(neighbor.data.name, {
+        score,
+        student: neighbor.data
+      });
+    }
+  });
+  
+  // Get top k combined neighbors
+  return Array.from(combinedScores.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, k)
+    .map(item => item.student);
+};
+
+/**
+ * Get career recommendations based on similar students
+ * Returns a map of career titles to match scores
+ */
+const getRecommendationsFromSimilarStudents = (similarStudents: StudentData[]): Map<string, number> => {
+  const careerScores = new Map<string, number>();
+  
+  // For each similar student, analyze their skills and interests
+  // to determine the most likely career matches
+  similarStudents.forEach(student => {
+    // Calculate match scores for each career
+    careers.forEach(career => {
+      const skillMatchScore = calculateSkillMatch(student.skills, career.requiredSkills);
+      const interestMatchScore = calculateInterestMatch(student.interests, 
+        careerDetails[career.title]?.industries || []);
+      
+      // Calculate a weighted score for this student-career pair
+      const matchScore = (skillMatchScore * 0.7) + (interestMatchScore * 0.3);
+      
+      // Add to cumulative score for this career
+      const currentScore = careerScores.get(career.title) || 0;
+      careerScores.set(career.title, currentScore + matchScore);
+    });
+  });
+  
+  // Normalize scores by number of similar students
+  careerScores.forEach((score, career) => {
+    careerScores.set(career, score / similarStudents.length);
+  });
+  
+  return careerScores;
+};
+
+/**
  * Get career recommendations based on user profile
- * Using a weighted average of multiple factors
+ * Using a weighted average of multiple factors including kNN
  */
 export const getCareerRecommendations = (userProfile: UserProfile): CareerRecommendation[] => {
   const recommendations: CareerRecommendation[] = [];
+  
+  // Find similar student profiles using kNN
+  const similarStudents = findSimilarStudents(userProfile);
+  console.log("Similar students:", similarStudents.map(s => s.name));
+  
+  // Get career recommendations based on similar students
+  const similarStudentRecommendations = getRecommendationsFromSimilarStudents(similarStudents);
   
   for (const career of careers) {
     // Calculate individual match scores
@@ -247,11 +434,15 @@ export const getCareerRecommendations = (userProfile: UserProfile): CareerRecomm
     const academicMatchScore = calculateAcademicMatch(userProfile.sscPercentage, userProfile.hscPercentage);
     const workEnvironmentScore = calculateWorkEnvironmentMatch(userProfile.preferredWorkStyle, details.workEnvironment);
     
+    // Get similar student recommendation score for this career
+    const similarStudentScore = similarStudentRecommendations.get(career.title) || 0;
+    
     // Apply weighted average using predefined weights
     const matchPercentage = Math.round(
       (skillMatchScore * recommendationWeights.skillMatch) +
       (interestMatchScore * recommendationWeights.interestMatch) +
-      (academicMatchScore * recommendationWeights.academicMatch)
+      (academicMatchScore * recommendationWeights.academicMatch) +
+      (similarStudentScore * recommendationWeights.similarStudents)
     );
     
     // Only include careers with at least 30% match
@@ -268,7 +459,9 @@ export const getCareerRecommendations = (userProfile: UserProfile): CareerRecomm
   return recommendations.sort((a, b) => b.matchPercentage - a.matchPercentage);
 };
 
-// Function to analyze recommendation results and provide insights
+/**
+ * Function to analyze recommendation results and provide insights
+ */
 export const analyzeRecommendations = (recommendations: CareerRecommendation[]): {
   topSkills: string[];
   suggestedCourses: string[];

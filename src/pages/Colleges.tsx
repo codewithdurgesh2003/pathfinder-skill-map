@@ -24,164 +24,272 @@ import {
   ChevronRight, 
   MapPin, 
   Search,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from "lucide-react";
 
-// Mock colleges data
+// College data from CSV
 const collegesData = [
   {
     id: 1,
-    name: "Tech University",
-    location: "California, USA",
-    field: "Computer Science",
-    fees: "$25,000 / year",
-    rating: 4.8,
-    admissionRate: "15%",
-    website: "https://example.com/techuniversity",
+    name: "Andhra University College of Arts and Commerce",
+    location: "Andhra Pradesh",
+    field: "BA",
+    fees: "₹25,000 / year",
+    rating: 4.5,
+    admissionRate: "22%",
+    website: "https://example.com/andhrauniversity",
   },
   {
     id: 2,
-    name: "Data Science Institute",
-    location: "New York, USA",
-    field: "Data Science",
-    fees: "$28,000 / year",
-    rating: 4.7,
-    admissionRate: "18%",
-    website: "https://example.com/datascienceinstitute",
+    name: "Sri Venkateswara University",
+    location: "Andhra Pradesh",
+    field: "BA",
+    fees: "₹24,000 / year",
+    rating: 4.3,
+    admissionRate: "25%",
+    website: "https://example.com/srivenkateswara",
   },
   {
     id: 3,
-    name: "Design Academy",
-    location: "California, USA",
-    field: "Design",
-    fees: "$22,000 / year",
-    rating: 4.5,
-    admissionRate: "25%",
-    website: "https://example.com/designacademy",
+    name: "Acharya Nagarjuna University",
+    location: "Andhra Pradesh",
+    field: "BA",
+    fees: "₹18,000 / year",
+    rating: 4.2,
+    admissionRate: "30%",
+    website: "https://example.com/nagarjuna",
   },
   {
     id: 4,
-    name: "Engineering College",
-    location: "Texas, USA",
-    field: "Engineering",
-    fees: "$23,000 / year",
-    rating: 4.6,
-    admissionRate: "30%",
-    website: "https://example.com/engineeringcollege",
+    name: "GITAM University",
+    location: "Andhra Pradesh",
+    field: "BBA",
+    fees: "₹1,25,000 / year",
+    rating: 4.7,
+    admissionRate: "15%",
+    website: "https://example.com/gitam",
   },
   {
     id: 5,
-    name: "Business School",
-    location: "Massachusetts, USA",
-    field: "Business",
-    fees: "$30,000 / year",
-    rating: 4.9,
-    admissionRate: "12%",
-    website: "https://example.com/businessschool",
+    name: "Andhra University",
+    location: "Andhra Pradesh",
+    field: "BBA",
+    fees: "₹60,000 / year",
+    rating: 4.4,
+    admissionRate: "20%",
+    website: "https://example.com/andhrauniv",
   },
   {
     id: 6,
-    name: "Medical University",
-    location: "Pennsylvania, USA",
-    field: "Healthcare",
-    fees: "$35,000 / year",
-    rating: 4.8,
-    admissionRate: "8%",
-    website: "https://example.com/medicaluniversity",
+    name: "KL University",
+    location: "Andhra Pradesh",
+    field: "BBA",
+    fees: "₹1,10,000 / year",
+    rating: 4.6,
+    admissionRate: "18%",
+    website: "https://example.com/kluniversity",
   },
   {
     id: 7,
-    name: "Arts College",
-    location: "New York, USA",
-    field: "Arts",
-    fees: "$20,000 / year",
+    name: "Andhra University",
+    location: "Andhra Pradesh",
+    field: "BCom",
+    fees: "₹50,000 / year",
     rating: 4.4,
-    admissionRate: "35%",
-    website: "https://example.com/artscollege",
+    admissionRate: "23%",
+    website: "https://example.com/andhrauni",
   },
   {
     id: 8,
-    name: "Science Institute",
-    location: "Illinois, USA",
-    field: "Science",
-    fees: "$26,000 / year",
+    name: "St. Joseph's College",
+    location: "Andhra Pradesh",
+    field: "BCom",
+    fees: "₹60,000 / year",
     rating: 4.6,
-    admissionRate: "22%",
-    website: "https://example.com/scienceinstitute",
+    admissionRate: "19%",
+    website: "https://example.com/stjosephap",
   },
   {
     id: 9,
-    name: "Media School",
-    location: "California, USA",
-    field: "Media",
-    fees: "$24,000 / year",
-    rating: 4.3,
-    admissionRate: "40%",
-    website: "https://example.com/mediaschool",
+    name: "Andhra Medical College",
+    location: "Andhra Pradesh",
+    field: "BSc Nursing",
+    fees: "₹40,000 / year",
+    rating: 4.8,
+    admissionRate: "12%",
+    website: "https://example.com/amc",
   },
   {
     id: 10,
-    name: "Law University",
-    location: "Washington, USA",
-    field: "Law",
-    fees: "$32,000 / year",
-    rating: 4.7,
-    admissionRate: "15%",
-    website: "https://example.com/lawuniversity",
+    name: "Rajiv Gandhi University",
+    location: "Arunachal Pradesh",
+    field: "BA",
+    fees: "₹15,000 / year",
+    rating: 4.1,
+    admissionRate: "35%",
+    website: "https://example.com/rgu",
   },
   {
     id: 11,
-    name: "Marketing Institute",
-    location: "Florida, USA",
-    field: "Marketing",
-    fees: "$23,000 / year",
-    rating: 4.4,
-    admissionRate: "30%",
-    website: "https://example.com/marketinginstitute",
+    name: "Himalayan University",
+    location: "Arunachal Pradesh",
+    field: "BA",
+    fees: "₹12,000 / year",
+    rating: 4.0,
+    admissionRate: "40%",
+    website: "https://example.com/himalayan",
   },
   {
     id: 12,
-    name: "Environmental Studies College",
-    location: "Oregon, USA",
-    field: "Environment",
-    fees: "$21,000 / year",
-    rating: 4.5,
+    name: "Himalayan University",
+    location: "Arunachal Pradesh",
+    field: "BBA",
+    fees: "₹70,000 / year",
+    rating: 4.2,
     admissionRate: "28%",
-    website: "https://example.com/environmentalcollege",
+    website: "https://example.com/himalayanunibba",
+  },
+  {
+    id: 13,
+    name: "Arunachal University",
+    location: "Arunachal Pradesh",
+    field: "BCom",
+    fees: "₹40,000 / year",
+    rating: 3.9,
+    admissionRate: "45%",
+    website: "https://example.com/arunachaluni",
+  },
+  {
+    id: 14,
+    name: "Cotton University",
+    location: "Assam",
+    field: "BA",
+    fees: "₹16,000 / year",
+    rating: 4.3,
+    admissionRate: "30%",
+    website: "https://example.com/cotton",
+  },
+  {
+    id: 15,
+    name: "Gauhati University",
+    location: "Assam",
+    field: "BA",
+    fees: "₹14,000 / year",
+    rating: 4.4,
+    admissionRate: "28%",
+    website: "https://example.com/gauhati",
+  },
+  {
+    id: 16,
+    name: "Assam Don Bosco University",
+    location: "Assam",
+    field: "BBA",
+    fees: "₹1,10,000 / year",
+    rating: 4.5,
+    admissionRate: "20%",
+    website: "https://example.com/donbosco",
+  },
+  {
+    id: 17,
+    name: "Gauhati University",
+    location: "Assam",
+    field: "BCom",
+    fees: "₹50,000 / year",
+    rating: 4.2,
+    admissionRate: "32%",
+    website: "https://example.com/gauhatiuniv",
+  },
+  {
+    id: 18,
+    name: "Christ University",
+    location: "Karnataka",
+    field: "BA",
+    fees: "₹90,000 / year",
+    rating: 4.8,
+    admissionRate: "15%",
+    website: "https://example.com/christ",
+  },
+  {
+    id: 19,
+    name: "Christ University",
+    location: "Karnataka",
+    field: "BBA",
+    fees: "₹1,30,000 / year",
+    rating: 4.9,
+    admissionRate: "12%",
+    website: "https://example.com/christbba",
+  },
+  {
+    id: 20,
+    name: "St. Xavier's College, Mumbai",
+    location: "Maharashtra",
+    field: "BA",
+    fees: "₹13,900 / year",
+    rating: 4.7,
+    admissionRate: "18%",
+    website: "https://example.com/xaviers",
+  },
+  {
+    id: 21,
+    name: "NMIMS University",
+    location: "Maharashtra",
+    field: "BBA",
+    fees: "₹2,50,000 / year",
+    rating: 4.9,
+    admissionRate: "10%",
+    website: "https://example.com/nmims",
+  },
+  {
+    id: 22,
+    name: "University of Delhi",
+    location: "Delhi",
+    field: "BA",
+    fees: "₹15,000 / year",
+    rating: 4.8,
+    admissionRate: "15%",
+    website: "https://example.com/du",
+  },
+  {
+    id: 23,
+    name: "Loyola College of Arts and Sciences",
+    location: "Tamil Nadu",
+    field: "BBA",
+    fees: "₹1,20,000 / year",
+    rating: 4.7,
+    admissionRate: "18%",
+    website: "https://example.com/loyola",
+  },
+  {
+    id: 24,
+    name: "Stella Maris College",
+    location: "Tamil Nadu",
+    field: "BCom",
+    fees: "₹1,00,000 / year",
+    rating: 4.6,
+    admissionRate: "20%",
+    website: "https://example.com/stella",
+  },
+  {
+    id: 25,
+    name: "St. Xavier's College, Kolkata",
+    location: "West Bengal",
+    field: "BCom",
+    fees: "₹75,000 / year",
+    rating: 4.7,
+    admissionRate: "16%",
+    website: "https://example.com/xavierskolkata",
   },
 ];
 
-const fieldOptions = [
-  "All Fields",
-  "Computer Science",
-  "Data Science",
-  "Design",
-  "Engineering",
-  "Business",
-  "Healthcare",
-  "Arts",
-  "Science",
-  "Media",
-  "Law",
-  "Marketing",
-  "Environment",
-];
+// Extract unique fields (degrees)
+const fieldOptions = ["All Degrees", ...new Set(collegesData.map(college => college.field))].sort();
 
-const locationOptions = [
-  "All Locations",
-  "California, USA",
-  "New York, USA",
-  "Texas, USA",
-  "Massachusetts, USA",
-  "Pennsylvania, USA",
-  "Illinois, USA",
-  "Washington, USA",
-  "Florida, USA",
-  "Oregon, USA",
-];
+// Extract unique locations (states)
+const locationOptions = ["All Locations", ...new Set(collegesData.map(college => college.location))].sort();
 
 const Colleges = () => {
-  const [field, setField] = useState("All Fields");
+  const [field, setField] = useState("All Degrees");
   const [location, setLocation] = useState("All Locations");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -190,7 +298,7 @@ const Colleges = () => {
 
   // Filter colleges based on selected field, location, and search query
   const filteredColleges = collegesData.filter((college) => {
-    const fieldMatch = field === "All Fields" || college.field === field;
+    const fieldMatch = field === "All Degrees" || college.field === field;
     const locationMatch = location === "All Locations" || college.location === location;
     const searchMatch = college.name.toLowerCase().includes(searchQuery.toLowerCase());
     return fieldMatch && locationMatch && searchMatch;
@@ -213,13 +321,24 @@ const Colleges = () => {
     setSelectedCollege(null);
   };
 
+  // Get degree display name
+  const getDegreeFullName = (shortCode: string) => {
+    const degreeMap: {[key: string]: string} = {
+      "BA": "Bachelor of Arts",
+      "BBA": "Bachelor of Business Administration",
+      "BCom": "Bachelor of Commerce",
+      "BSc Nursing": "Bachelor of Science in Nursing"
+    };
+    return degreeMap[shortCode] || shortCode;
+  };
+
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3 gradient-heading">College Recommendations</h1>
           <p className="text-career-gray max-w-2xl mx-auto">
-            Find the best colleges and universities to pursue your desired career path based on your preferences.
+            Find the best colleges and universities across India to pursue your desired degree based on your preferences.
           </p>
         </div>
 
@@ -227,31 +346,31 @@ const Colleges = () => {
           <CardHeader>
             <CardTitle className="text-xl text-career-blue">Filter Colleges</CardTitle>
             <CardDescription>
-              Select field of study and location to find the most suitable colleges.
+              Select degree type and location to find the most suitable colleges for your education.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Field of Study</label>
+                <label className="text-sm font-medium mb-1.5 block">Degree Type</label>
                 <Select value={field} onValueChange={setField}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select field" />
+                    <SelectValue placeholder="Select degree" />
                   </SelectTrigger>
                   <SelectContent>
                     {fieldOptions.map((option) => (
                       <SelectItem key={option} value={option}>
-                        {option}
+                        {option === "All Degrees" ? option : getDegreeFullName(option)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Location</label>
+                <label className="text-sm font-medium mb-1.5 block">State</label>
                 <Select value={location} onValueChange={setLocation}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select location" />
+                    <SelectValue placeholder="Select state" />
                   </SelectTrigger>
                   <SelectContent>
                     {locationOptions.map((option) => (
@@ -304,10 +423,10 @@ const Colleges = () => {
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <GraduationCap className="h-5 w-5 text-career-purple mt-0.5" />
+                    <BookOpen className="h-5 w-5 text-career-purple mt-0.5" />
                     <div>
-                      <p className="font-medium">Field of Study</p>
-                      <p className="text-gray-600">{selectedCollege.field}</p>
+                      <p className="font-medium">Degree Program</p>
+                      <p className="text-gray-600">{getDegreeFullName(selectedCollege.field)}</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">
@@ -360,9 +479,9 @@ const Colleges = () => {
               <div className="mt-6 p-4 bg-career-lightblue rounded-lg">
                 <h3 className="font-semibold text-career-blue mb-2">Why This College?</h3>
                 <p className="text-gray-700">
-                  {selectedCollege.name} is an excellent choice for students interested in {selectedCollege.field}. 
-                  With state-of-the-art facilities, experienced faculty, and strong industry connections, 
-                  the college provides a supportive environment for academic and professional growth.
+                  {selectedCollege.name} is an excellent choice for students interested in {getDegreeFullName(selectedCollege.field)}. 
+                  Located in {selectedCollege.location}, the college provides a supportive environment for academic and 
+                  professional growth with experienced faculty and strong industry connections.
                 </p>
               </div>
 
@@ -380,8 +499,8 @@ const Colleges = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>College Name</TableHead>
-                    <TableHead>Field</TableHead>
-                    <TableHead>Location</TableHead>
+                    <TableHead>Degree</TableHead>
+                    <TableHead>State</TableHead>
                     <TableHead>Fees</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>

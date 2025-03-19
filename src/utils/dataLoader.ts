@@ -1,4 +1,3 @@
-
 /**
  * Utilities for efficiently loading and processing large datasets
  */
@@ -105,6 +104,11 @@ export const saveUserProfile = (email: string, profile: any) => {
     email,
     ...profile
   }));
+};
+
+// Logout user
+export const logoutUser = () => {
+  localStorage.removeItem('currentUser');
 };
 
 // Get all user profiles (for machine learning purposes)

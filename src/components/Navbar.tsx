@@ -1,14 +1,57 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Briefcase, GraduationCap, Home, Info } from "lucide-react";
+import { Menu, X, Briefcase, GraduationCap, Home, Info, LogOut, User } from "lucide-react";
+import { isUserLoggedIn, getCurrentUser } from "@/utils/dataLoader";
+import { useToast } from "@/components/ui/use-toast";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Check login status on component mount and when routes change
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const loggedIn = isUserLoggedIn();
+      setIsLoggedIn(loggedIn);
+      
+      if (loggedIn) {
+        const user = getCurrentUser();
+        setUserName(user?.name || user?.email || "User");
+      }
+    };
+    
+    checkLoginStatus();
+    
+    // Add event listener for storage changes (for logout in other tabs)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'currentUser') {
+        checkLoginStatus();
+      }
+    });
+    
+    return () => {
+      window.removeEventListener('storage', () => {});
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    setIsLoggedIn(false);
+    setUserName("");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully.",
+    });
+    navigate("/");
   };
 
   return (
@@ -50,11 +93,29 @@ const Navbar = () => {
               <Info className="h-4 w-4" />
               <span>About</span>
             </Link>
-            <Link to="/assessment">
-              <Button className="bg-career-purple hover:bg-career-blue text-white transition-colors">
-                Start Assessment
-              </Button>
-            </Link>
+            
+            {isLoggedIn ? (
+              <>
+                <div className="flex items-center space-x-1 text-career-gray">
+                  <User className="h-4 w-4" />
+                  <span>{userName}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 border-career-purple text-career-purple hover:bg-career-lightpurple"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/assessment">
+                <Button className="bg-career-purple hover:bg-career-blue text-white transition-colors">
+                  Start Assessment
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -100,15 +161,36 @@ const Navbar = () => {
               <Info className="h-4 w-4" />
               <span>About</span>
             </Link>
-            <Link 
-              to="/assessment" 
-              className="block"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Button className="w-full bg-career-purple hover:bg-career-blue text-white transition-colors">
-                Start Assessment
-              </Button>
-            </Link>
+            
+            {isLoggedIn ? (
+              <>
+                <div className="flex items-center space-x-2 py-2 px-3 text-career-gray">
+                  <User className="h-4 w-4" />
+                  <span>{userName}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-1 border-career-purple text-career-purple hover:bg-career-lightpurple"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Link 
+                to="/assessment" 
+                className="block"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button className="w-full bg-career-purple hover:bg-career-blue text-white transition-colors">
+                  Start Assessment
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>

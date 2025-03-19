@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,6 +10,19 @@ import { isUserLoggedIn, getCurrentUser } from "@/utils/dataLoader";
 const Registration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Check if user is logged in
+  useEffect(() => {
+    // Redirect non-logged in users to assessment page
+    if (!isUserLoggedIn()) {
+      toast({
+        title: "Login Required",
+        description: "Please login or register to access this page.",
+        variant: "destructive"
+      });
+      navigate("/assessment");
+    }
+  }, [navigate, toast]);
 
   const handleSubmit = (data: any) => {
     toast({
@@ -45,14 +59,13 @@ const Registration = () => {
     navigate("/aptitude-test");
   };
 
+  // If not logged in, don't render the form (will redirect via useEffect)
+  if (!isUserLoggedIn()) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto py-10 px-4">
-      {!isUserLoggedIn() && (
-        <div className="mb-8 max-w-3xl mx-auto">
-          <UserAuth />
-        </div>
-      )}
-      
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl gradient-heading">Student Profile</CardTitle>
@@ -60,7 +73,7 @@ const Registration = () => {
             Please provide your information to start the career assessment process.
             {isUserLoggedIn() && (
               <span className="block mt-2 text-career-blue">
-                Logged in as: {getCurrentUser().name} ({getCurrentUser().email})
+                Logged in as: {getCurrentUser().name || getCurrentUser().email}
               </span>
             )}
           </CardDescription>

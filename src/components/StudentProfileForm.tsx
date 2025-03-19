@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -30,7 +30,6 @@ const studentProfileSchema = z.object({
   }, {
     message: "HSC percentage must be a number between 0 and 100",
   }),
-  preferredWorkStyle: z.enum(["remote", "office", "hybrid"]),
 });
 
 type StudentProfileData = z.infer<typeof studentProfileSchema>;
@@ -51,7 +50,6 @@ const StudentProfileForm = ({ onSubmit }: StudentProfileFormProps) => {
       interests: [],
       sscPercentage: "",
       hscPercentage: "",
-      preferredWorkStyle: "office",
     }
   });
 
@@ -225,49 +223,6 @@ const StudentProfileForm = ({ onSubmit }: StudentProfileFormProps) => {
                   />
                 ))}
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="preferredWorkStyle"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Preferred Work Style</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="remote" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Remote
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="office" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Office
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="hybrid" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Hybrid
-                    </FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

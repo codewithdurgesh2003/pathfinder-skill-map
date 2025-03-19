@@ -315,13 +315,23 @@ const findSimilarStudents = (userProfile: UserProfile, k = knnConfig.k): Student
   // Convert user profiles to student data format and add to our dataset
   if (userProfiles && userProfiles.length > 0) {
     const convertedProfiles = userProfiles.map(profile => {
+      // Ensure type safety by properly typing the profile
+      const typedProfile = profile as {
+        name?: string;
+        sscPercentage?: string;
+        hscPercentage?: string;
+        skills?: string[];
+        interests?: string[];
+        preferredWorkStyle?: "remote" | "office" | "hybrid";
+      };
+      
       return {
-        name: profile.name || "Past User",
-        sscPercentage: parseFloat(profile.sscPercentage) || 75,
-        hscPercentage: parseFloat(profile.hscPercentage) || 75,
-        skills: profile.skills || [],
-        interests: profile.interests || [],
-        preferredWorkStyle: profile.preferredWorkStyle
+        name: typedProfile.name || "Past User",
+        sscPercentage: parseFloat(typedProfile.sscPercentage || "75"),
+        hscPercentage: parseFloat(typedProfile.hscPercentage || "75"),
+        skills: typedProfile.skills || [],
+        interests: typedProfile.interests || [],
+        preferredWorkStyle: typedProfile.preferredWorkStyle
       } as StudentData;
     });
     

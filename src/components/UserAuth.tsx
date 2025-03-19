@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,14 +15,19 @@ const UserAuth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [loginChecked, setLoginChecked] = useState(false);
 
   // Check if user is already logged in
-  if (isUserLoggedIn()) {
+  useEffect(() => {
+    setLoginChecked(true);
+  }, []);
+
+  if (loginChecked && isUserLoggedIn()) {
     const user = getCurrentUser();
     return (
       <Card className="max-w-md mx-auto">
         <CardHeader>
-          <CardTitle>Welcome back, {user.name}</CardTitle>
+          <CardTitle>Welcome back, {user.name || user.email}</CardTitle>
           <CardDescription>You are already logged in</CardDescription>
         </CardHeader>
         <CardFooter className="flex justify-between">
@@ -71,7 +76,8 @@ const UserAuth = () => {
         description: "Welcome back!",
       });
       
-      navigate("/assessment");
+      // Refresh the page to update navigation
+      window.location.reload();
     } else {
       toast({
         title: "Login failed",
@@ -99,10 +105,11 @@ const UserAuth = () => {
     
     toast({
       title: "Registration successful",
-      description: "You can now proceed to the assessment.",
+      description: "You can now proceed with the assessment.",
     });
     
-    navigate("/assessment");
+    // Refresh the page to update navigation
+    window.location.reload();
   };
 
   return (

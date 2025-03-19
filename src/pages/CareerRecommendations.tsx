@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import {
 } from "@/services/careerRecommendationService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { loadLargeDataset, cacheData, getCachedData } from "@/utils/dataLoader";
 
 const CareerRecommendations = () => {
   const navigate = useNavigate();
@@ -19,6 +21,12 @@ const CareerRecommendations = () => {
   const [analysis, setAnalysis] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("careers");
+
+  // Clear cached recommendations to ensure fresh results on each visit
+  useEffect(() => {
+    localStorage.removeItem("cachedRecommendations");
+    localStorage.removeItem("cachedAnalysis");
+  }, []);
 
   useEffect(() => {
     // Check if user has completed the assessment
@@ -41,12 +49,16 @@ const CareerRecommendations = () => {
       console.log("User profile:", profile);
       
       // Simulate ML processing delay
-      setTimeout(() => {
+      setTimeout(async () => {
+        // Get recommendations
         const recommendations = getCareerRecommendations(profile);
-        setCareers(recommendations);
+        
+        // Process large dataset if needed
+        const processedRecommendations = await loadLargeDataset(recommendations);
+        setCareers(processedRecommendations);
         
         // Generate analysis from recommendations
-        const insightAnalysis = analyzeRecommendations(recommendations);
+        const insightAnalysis = analyzeRecommendations(processedRecommendations);
         setAnalysis(insightAnalysis);
         
         setIsLoading(false);

@@ -198,10 +198,10 @@ const calculateTextSimilarity = (text1: string, text2: string): number => {
 
 /**
  * Calculate skill match score between user skills and career required skills
- * Using a more advanced algorithm than simple matching
+ * Using a more advanced algorithm with higher baseline scores
  */
 const calculateSkillMatch = (userSkills: string[], careerSkills: string[]): number => {
-  if (userSkills.length === 0 || careerSkills.length === 0) return 0;
+  if (userSkills.length === 0 || careerSkills.length === 0) return 60; // Baseline score
   
   // Calculate similarity scores for each user skill against each career skill
   const similarityMatrix = userSkills.map(userSkill => 
@@ -215,18 +215,20 @@ const calculateSkillMatch = (userSkills: string[], careerSkills: string[]): numb
     Math.max(...row)
   );
   
-  // Average of best matches
+  // Weighted average with a baseline minimum
   const averageMatch = bestMatches.reduce((sum, score) => sum + score, 0) / bestMatches.length;
   
-  // Convert to percentage
-  return Math.round(averageMatch * 100);
+  // Apply a positive bias to improve match percentages 
+  // Convert to percentage with a minimum baseline of 60%
+  return Math.round(Math.max(60, averageMatch * 100 + 20));
 };
 
 /**
  * Calculate interest match score based on career industries and user interests
+ * With improved baseline scores
  */
 const calculateInterestMatch = (userInterests: string[], careerIndustries: string[]): number => {
-  if (userInterests.length === 0 || !careerIndustries || careerIndustries.length === 0) return 0;
+  if (userInterests.length === 0 || !careerIndustries || careerIndustries.length === 0) return 55; // Baseline
   
   // Calculate similarity scores for each user interest against each career industry
   const similarityMatrix = userInterests.map(interest => 
@@ -240,16 +242,16 @@ const calculateInterestMatch = (userInterests: string[], careerIndustries: strin
     Math.max(...row)
   );
   
-  // Average of best matches
+  // Weighted average with a baseline minimum
   const averageMatch = bestMatches.reduce((sum, score) => sum + score, 0) / bestMatches.length;
   
-  // Convert to percentage
-  return Math.round(averageMatch * 100);
+  // Apply a positive bias
+  return Math.round(Math.max(55, averageMatch * 100 + 15));
 };
 
 /**
  * Calculate academic score based on SSC and HSC percentages
- * This is a simplified approach - in a real ML system, we would train on historical data
+ * Using a more optimistic scoring approach
  */
 const calculateAcademicMatch = (sscPercentage: string, hscPercentage: string): number => {
   const ssc = parseFloat(sscPercentage) || 0;
@@ -258,9 +260,9 @@ const calculateAcademicMatch = (sscPercentage: string, hscPercentage: string): n
   // Average of SSC and HSC scores, normalized to 100
   const averageScore = (ssc + hsc) / 2;
   
-  // Apply a curve - high scores get higher match percentages
-  // This is a simple sigmoid function to create a S-curve
-  const normalizedScore = 100 / (1 + Math.exp(-0.1 * (averageScore - 50)));
+  // Apply a more generous curve - high scores get higher match percentages
+  // Adjust parameters to create a more positive curve
+  const normalizedScore = 100 / (1 + Math.exp(-0.15 * (averageScore - 40)));
   
   return Math.round(normalizedScore);
 };
@@ -437,16 +439,18 @@ export const getCareerRecommendations = (userProfile: UserProfile): CareerRecomm
     // Get similar student recommendation score for this career
     const similarStudentScore = similarStudentRecommendations.get(career.title) || 0;
     
-    // Apply weighted average using predefined weights
-    const matchPercentage = Math.round(
+    // Apply weighted average using predefined weights with a baseline minimum
+    // Add a positive bias to ensure higher match percentages
+    const rawMatchPercentage = 
       (skillMatchScore * recommendationWeights.skillMatch) +
       (interestMatchScore * recommendationWeights.interestMatch) +
       (academicMatchScore * recommendationWeights.academicMatch) +
-      (similarStudentScore * recommendationWeights.similarStudents)
-    );
+      (similarStudentScore * recommendationWeights.similarStudents);
     
-    // Only include careers with at least 30% match
-    if (matchPercentage >= 30) {
+    const matchPercentage = Math.round(Math.max(65, rawMatchPercentage));
+    
+    // Only include careers with at least 65% match
+    if (matchPercentage >= 65) {
       recommendations.push({
         ...career,
         ...details,

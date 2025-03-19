@@ -110,6 +110,16 @@ type Question = {
   answer?: string;
 };
 
+// Utility function to shuffle array
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 const AptitudeTest = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -127,7 +137,11 @@ const AptitudeTest = () => {
     }
   }, [navigate, toast]);
 
-  const allQuestions = [...personalityQuestions, ...aptitudeQuestions];
+  // Shuffle questions on component mount
+  const [shuffledPersonalityQuestions] = useState(() => shuffleArray(personalityQuestions));
+  const [shuffledAptitudeQuestions] = useState(() => shuffleArray(aptitudeQuestions));
+  
+  const allQuestions = [...shuffledPersonalityQuestions, ...shuffledAptitudeQuestions];
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -172,13 +186,13 @@ const AptitudeTest = () => {
     // Calculate scores (in a real app, we would do more complex calculations)
     const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
 
-    // Process aptitude answers
-    const aptitudeScore = aptitudeQuestions.reduce((score, question) => {
+    // Process aptitude answers - match shuffled question IDs with original answers
+    const aptitudeScore = shuffledAptitudeQuestions.reduce((score, question) => {
       return score + (answers[question.id] === question.answer ? 1 : 0);
     }, 0);
 
     // Process personality answers
-    const personalityTraits = personalityQuestions.reduce(
+    const personalityTraits = shuffledPersonalityQuestions.reduce(
       (traits, question) => {
         const answer = Number(answers[question.id]);
         const score = question.reversed ? 6 - answer : answer;

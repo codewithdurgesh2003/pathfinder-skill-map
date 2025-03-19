@@ -73,3 +73,42 @@ export const getCachedData = <T>(key: string): T | null => {
     return null;
   }
 };
+
+// Check if user is logged in
+export const isUserLoggedIn = (): boolean => {
+  return localStorage.getItem('currentUser') !== null;
+};
+
+// Get current user profile
+export const getCurrentUser = () => {
+  const userData = localStorage.getItem('currentUser');
+  return userData ? JSON.parse(userData) : null;
+};
+
+// Save user profile
+export const saveUserProfile = (email: string, profile: any) => {
+  // Get existing users
+  const usersData = localStorage.getItem('userProfiles') || '{}';
+  const users = JSON.parse(usersData);
+  
+  // Update or add new user profile
+  users[email] = {
+    ...profile,
+    lastUpdated: new Date().toISOString()
+  };
+  
+  // Save updated users data
+  localStorage.setItem('userProfiles', JSON.stringify(users));
+  
+  // Set current user
+  localStorage.setItem('currentUser', JSON.stringify({
+    email,
+    ...profile
+  }));
+};
+
+// Get all user profiles (for machine learning purposes)
+export const getAllUserProfiles = () => {
+  const usersData = localStorage.getItem('userProfiles') || '{}';
+  return Object.values(JSON.parse(usersData));
+};

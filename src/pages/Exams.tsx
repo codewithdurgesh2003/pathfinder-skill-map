@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, FileUp, Database } from "lucide-react";
 
 // Exam data
 const exams = [
@@ -158,12 +158,37 @@ const ExamsPage = () => {
                   We use a K-Nearest Neighbors (KNN) algorithm trained on student data to match your profile 
                   with suitable career paths based on your interests, skills, and academic performance.
                 </p>
-                <Button variant="outline" asChild className="flex items-center gap-2">
-                  <a href="https://colab.research.google.com/drive/1MFIlUCMk5cSsUWG2C6Aur1nR2cFjVwYt?usp=sharing" target="_blank" rel="noopener noreferrer">
-                    <span>Open ML Model in Google Colab</span>
-                    <ExternalLink size={16} />
-                  </a>
-                </Button>
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-md border border-blue-200">
+                    <h3 className="text-blue-800 font-medium mb-2 flex items-center gap-2">
+                      <Database size={18} />
+                      How to Use Your Own CSV Dataset
+                    </h3>
+                    <ol className="list-decimal pl-5 space-y-2 text-gray-700">
+                      <li>Prepare your CSV file with student profiles and career outcomes</li>
+                      <li>Required columns: interests, skills, academic performance, and career outcomes</li>
+                      <li>Upload your CSV when prompted in the Google Colab notebook</li>
+                      <li>The model will automatically train on your dataset</li>
+                      <li>You'll see accuracy metrics, charts, and predictions based on your data</li>
+                    </ol>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button variant="outline" asChild className="flex items-center gap-2">
+                      <a href="https://colab.research.google.com/drive/1MFIlUCMk5cSsUWG2C6Aur1nR2cFjVwYt?usp=sharing" target="_blank" rel="noopener noreferrer">
+                        <span>Open ML Model in Google Colab</span>
+                        <ExternalLink size={16} />
+                      </a>
+                    </Button>
+                    
+                    <Button variant="outline" asChild className="flex items-center gap-2">
+                      <a href="https://github.com/your-username/career-recommendation-model/archive/refs/heads/main.zip" download className="flex items-center gap-2">
+                        <FileUp size={16} />
+                        <span>Download Sample Dataset</span>
+                      </a>
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

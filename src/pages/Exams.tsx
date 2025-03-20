@@ -1,503 +1,195 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Search, 
-  FileText, 
-  Calendar, 
-  GraduationCap, 
-  BookOpen, 
-  AlertCircle, 
-  Download, 
-  ExternalLink
-} from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
-// Sample exam data
-const examsData = [
+// Exam data
+const exams = [
   {
-    id: 1,
-    name: "GATE",
-    fullName: "Graduate Aptitude Test in Engineering",
-    category: "Engineering",
-    description: "GATE is a national examination conducted for admission to postgraduate programs in engineering and science.",
-    applicationPeriod: "September - October",
-    examDate: "February",
-    eligibility: "Bachelor's degree in Engineering/Technology/Architecture/Science",
-    pattern: "Multiple-choice questions, numerical answer type questions covering mathematics, general aptitude, and subject-specific topics.",
-    website: "https://gate.iitk.ac.in/",
-    hasPreviousPapers: true
+    id: "gate",
+    title: "GATE (Graduate Aptitude Test in Engineering)",
+    description: "National level examination for admission to postgraduate programs in engineering.",
+    applicationProcess: "Applications typically open in September each year. The process involves registration, application form filling, uploading documents, and fee payment.",
+    examPattern: "3-hour computer-based test with 65 questions (multiple choice and numerical answer type) worth 100 marks. Subjects include General Aptitude and specific engineering discipline.",
+    importantDates: "Registration: Sept-Oct, Exam: Feb, Results: March",
+    eligibility: "Bachelor's degree in Engineering/Technology or Master's degree in Science/Mathematics/Statistics/Computer Applications"
   },
   {
-    id: 2,
-    name: "NEET",
-    fullName: "National Eligibility cum Entrance Test",
-    category: "Medical",
-    description: "NEET is a nationwide entrance examination for students who wish to pursue medical courses in India.",
-    applicationPeriod: "December - January",
-    examDate: "May",
-    eligibility: "12th standard with Physics, Chemistry, and Biology/Biotechnology",
-    pattern: "180 multiple-choice questions from Physics, Chemistry, and Biology (Botany & Zoology).",
-    website: "https://neet.nta.nic.in/",
-    hasPreviousPapers: true
+    id: "neet",
+    title: "NEET (National Eligibility cum Entrance Test)",
+    description: "Single entrance examination for admission to MBBS and BDS courses in India.",
+    applicationProcess: "Online application through NTA website, upload photograph, signature, and pay application fee.",
+    examPattern: "3-hour pen-paper test with 180 multiple-choice questions from Physics, Chemistry, and Biology subjects.",
+    importantDates: "Registration: Dec-Jan, Exam: May, Results: June",
+    eligibility: "10+2 with Physics, Chemistry, Biology/Biotechnology and English as core subjects"
   },
   {
-    id: 3,
-    name: "JEE",
-    fullName: "Joint Entrance Examination",
-    category: "Engineering",
-    description: "JEE is a standardized test for admission to engineering colleges in India.",
-    applicationPeriod: "November - December",
-    examDate: "January, April, May, June",
-    eligibility: "12th standard with Physics, Chemistry, and Mathematics",
-    pattern: "Multiple-choice questions and numerical answer type questions from Physics, Chemistry, and Mathematics.",
-    website: "https://jeemain.nta.nic.in/",
-    hasPreviousPapers: true
+    id: "jee",
+    title: "JEE (Joint Entrance Examination)",
+    description: "National level engineering entrance exam for admission to various engineering colleges in India.",
+    applicationProcess: "Online application through JEE website, upload required documents, and pay application fee.",
+    examPattern: "JEE Main: 3-hour computer-based test with 90 questions. JEE Advanced: 6-hour exam (two sessions) with multiple-choice and numerical questions.",
+    importantDates: "JEE Main: Jan/Apr, JEE Advanced: May/June",
+    eligibility: "10+2 with Physics, Chemistry, and Mathematics as core subjects"
   },
   {
-    id: 4,
-    name: "CET",
-    fullName: "Common Entrance Test",
-    category: "Engineering",
-    description: "CET is a state-level entrance examination for admission to engineering and pharmacy courses.",
-    applicationPeriod: "March - April",
-    examDate: "May",
-    eligibility: "12th standard with Physics, Chemistry, and Mathematics/Biology",
-    pattern: "Multiple-choice questions from Physics, Chemistry, Mathematics/Biology.",
-    website: "https://cetcell.mahacet.org/",
-    hasPreviousPapers: true
+    id: "cet",
+    title: "CET (Common Entrance Test)",
+    description: "State level entrance test for admission to various undergraduate courses in state colleges.",
+    applicationProcess: "Online application through state CET website, document verification, and fee payment.",
+    examPattern: "Multiple choice questions from subjects relevant to the applied course (varies by state and course).",
+    importantDates: "Varies by state, typically held between April-June",
+    eligibility: "10+2 with subjects relevant to the applied course"
   },
   {
-    id: 5,
-    name: "CAT",
-    fullName: "Common Admission Test",
-    category: "Management",
-    description: "CAT is a computer-based test for admission to graduate management programs in India.",
-    applicationPeriod: "August - September",
-    examDate: "November",
-    eligibility: "Bachelor's degree with minimum 50% marks",
-    pattern: "Multiple-choice questions and non-MCQs from Verbal Ability, Data Interpretation, Logical Reasoning, and Quantitative Ability.",
-    website: "https://iimcat.ac.in/",
-    hasPreviousPapers: true
-  },
-  {
-    id: 6,
-    name: "UPSC",
-    fullName: "Union Public Service Commission",
-    category: "Civil Services",
-    description: "UPSC Civil Services Examination is conducted for recruitment to various Civil Services of the Government of India.",
-    applicationPeriod: "February - March",
-    examDate: "June (Prelims), September (Mains)",
-    eligibility: "Bachelor's degree in any discipline",
-    pattern: "Preliminary (objective), Mains (written), and Interview/Personality Test.",
-    website: "https://www.upsc.gov.in/",
-    hasPreviousPapers: true
-  },
-  {
-    id: 7,
-    name: "CLAT",
-    fullName: "Common Law Admission Test",
-    category: "Law",
-    description: "CLAT is a centralized test for admission to undergraduate and postgraduate law programs in India.",
-    applicationPeriod: "January - March",
-    examDate: "May",
-    eligibility: "12th standard with minimum 45% marks (for UG); Bachelor's degree in Law (for PG)",
-    pattern: "Multiple-choice questions from English, Current Affairs, Legal Reasoning, Logical Reasoning, and Quantitative Techniques.",
-    website: "https://consortiumofnlus.ac.in/",
-    hasPreviousPapers: true
-  },
-  {
-    id: 8,
-    name: "NATA",
-    fullName: "National Aptitude Test in Architecture",
-    category: "Architecture",
-    description: "NATA measures the aptitude of candidates for architecture through aesthetic sensitivity, drawing, and critical thinking tests.",
-    applicationPeriod: "January - March",
-    examDate: "April, June",
-    eligibility: "12th standard with Mathematics",
-    pattern: "Drawing test, aesthetic sensitivity test, and general aptitude test.",
-    website: "https://www.nata.in/",
-    hasPreviousPapers: true
+    id: "cat",
+    title: "CAT (Common Admission Test)",
+    description: "National level entrance test for admission to MBA programs in IIMs and other business schools.",
+    applicationProcess: "Online registration, application form submission, and fee payment through CAT website.",
+    examPattern: "2-hour computer-based test with sections on Verbal Ability, Data Interpretation & Logical Reasoning, and Quantitative Ability.",
+    importantDates: "Registration: Aug-Sept, Exam: Nov-Dec, Results: Jan",
+    eligibility: "Bachelor's degree with at least 50% marks or equivalent CGPA"
   }
 ];
 
-// Sample news data
-const newsData = [
+// News data
+const news = [
   {
     id: 1,
-    title: "GATE 2025 Registration to begin in August 2024",
-    date: "2024-04-15",
-    category: "Exam Updates",
-    source: "IIT Kanpur",
-    content: "IIT Kanpur has announced that the registration process for GATE 2025 will begin in August 2024. Candidates are advised to keep checking the official website for updates.",
-    url: "https://example.com/gate-2025"
+    title: "NEET 2023 Registration Opens Next Week",
+    date: "2023-10-15",
+    source: "Education Times",
+    content: "The National Testing Agency has announced that NEET 2023 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents."
   },
   {
     id: 2,
-    title: "NEET 2024 Application Correction Window Opens",
-    date: "2024-04-10",
-    category: "Exam Updates",
-    source: "NTA",
-    content: "The National Testing Agency (NTA) has opened the application correction window for NEET 2024. Candidates can make corrections until April 20, 2024.",
-    url: "https://example.com/neet-correction"
+    title: "JEE Main 2023 to be Conducted in Four Sessions",
+    date: "2023-10-12",
+    source: "Education Ministry",
+    content: "The Ministry of Education has announced that JEE Main 2023 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams."
   },
   {
     id: 3,
-    title: "JEE Advanced 2024 Registration to Start After JEE Main April Results",
-    date: "2024-04-05",
-    category: "Exam Updates",
+    title: "CAT 2023 Registration Deadline Extended",
+    date: "2023-10-10",
+    source: "IIM Bangalore",
+    content: "IIM Bangalore, the conducting body for CAT 2023, has extended the registration deadline by one week due to technical issues faced by candidates."
+  },
+  {
+    id: 4,
+    title: "New Changes in GATE 2023 Exam Pattern",
+    date: "2023-10-05",
     source: "IIT Delhi",
-    content: "IIT Delhi has announced that JEE Advanced 2024 registration will commence after the declaration of JEE Main April session results.",
-    url: "https://example.com/jee-advanced"
-  },
-  {
-    id: 4,
-    title: "New Scholarship Scheme Announced for Engineering Students",
-    date: "2024-04-01",
-    category: "Scholarships",
-    source: "Ministry of Education",
-    content: "The Ministry of Education has announced a new scholarship scheme for engineering students. The scheme aims to provide financial assistance to meritorious students from economically weaker sections.",
-    url: "https://example.com/scholarship-scheme"
+    content: "IIT Delhi has announced significant changes to the GATE 2023 exam pattern, including the introduction of new subjects and modifications to the marking scheme."
   },
   {
     id: 5,
-    title: "Changes in CLAT 2025 Exam Pattern Announced",
-    date: "2024-03-28",
-    category: "Exam Updates",
-    source: "Consortium of NLUs",
-    content: "The Consortium of National Law Universities has announced changes in the CLAT 2025 exam pattern. The exam will now have more emphasis on critical reasoning and analytical thinking.",
-    url: "https://example.com/clat-pattern"
+    title: "State CETs to Consider Board Marks for 2023 Admissions",
+    date: "2023-10-01",
+    source: "Higher Education Department",
+    content: "Various state education departments have announced that Common Entrance Tests for 2023 will consider board exam marks in addition to entrance test scores for final merit lists."
   }
 ];
 
-const Exams = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState("All Categories");
-  const [activeTab, setActiveTab] = useState("exams");
-  const [selectedExam, setSelectedExam] = useState<any>(null);
-  const [newsFilter, setNewsFilter] = useState("All");
-  
-  // Filter exams based on search query and category
-  const filteredExams = examsData.filter((exam) => {
-    const matchesSearch = 
-      exam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exam.fullName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = category === "All Categories" || exam.category === category;
-    return matchesSearch && matchesCategory;
-  });
-  
-  // Filter news based on category
-  const filteredNews = newsData.filter((news) => {
-    return newsFilter === "All" || news.category === newsFilter;
-  });
-  
-  // Extract unique categories
-  const categories = ["All Categories", ...new Set(examsData.map(exam => exam.category))];
-  
-  // Format date for news
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+const ExamsPage = () => {
+  const [selectedExam, setSelectedExam] = useState(exams[0]);
 
   return (
     <div className="container mx-auto py-10 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold mb-3 gradient-heading">Entrance Examinations Guide</h1>
-          <p className="text-career-gray max-w-2xl mx-auto">
-            Comprehensive information about various entrance exams, application processes, patterns, and the latest news.
-          </p>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="exams">Entrance Exams</TabsTrigger>
-            <TabsTrigger value="news">Latest News</TabsTrigger>
-          </TabsList>
-          
-          {/* Exams Tab */}
-          <TabsContent value="exams">
-            {selectedExam ? (
-              <ExamDetails exam={selectedExam} onBack={() => setSelectedExam(null)} />
-            ) : (
-              <>
-                <Card className="mb-6">
+      <h1 className="text-3xl font-bold mb-8 text-center">Entrance Examinations Guide</h1>
+      
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-3/4">
+          <Tabs defaultValue={exams[0].id} onValueChange={(value) => setSelectedExam(exams.find(exam => exam.id === value) || exams[0])}>
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4">
+              {exams.map(exam => (
+                <TabsTrigger key={exam.id} value={exam.id}>{exam.id.toUpperCase()}</TabsTrigger>
+              ))}
+            </TabsList>
+            
+            {exams.map(exam => (
+              <TabsContent key={exam.id} value={exam.id}>
+                <Card>
                   <CardHeader>
-                    <CardTitle className="text-xl text-career-blue">Find Your Exam</CardTitle>
-                    <CardDescription>
-                      Search for entrance exams by name or filter by category
-                    </CardDescription>
+                    <CardTitle>{exam.title}</CardTitle>
+                    <CardDescription>{exam.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-2">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input
-                            placeholder="Search exams by name..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Select value={category} onValueChange={setCategory}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map((cat) => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-lg">Application Process</h3>
+                      <p>{exam.applicationProcess}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-lg">Exam Pattern</h3>
+                      <p>{exam.examPattern}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-lg">Important Dates</h3>
+                      <p>{exam.importantDates}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-lg">Eligibility</h3>
+                      <p>{exam.eligibility}</p>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <Button variant="outline" className="mr-2">Download Previous Year Papers</Button>
+                      <a href="#" className="text-blue-600 hover:underline">Official Website</a>
                     </div>
                   </CardContent>
                 </Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredExams.map((exam) => (
-                    <Card key={exam.id} className="hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-xl text-career-blue flex items-center">
-                          <GraduationCap className="mr-2 h-5 w-5" />
-                          {exam.name}
-                        </CardTitle>
-                        <CardDescription>{exam.fullName}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-4">{exam.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <span className="text-xs bg-career-lightpurple text-career-purple px-2 py-1 rounded-full">
-                            {exam.category}
-                          </span>
-                          <span className="text-xs bg-career-lightblue text-career-blue px-2 py-1 rounded-full">
-                            <Calendar className="inline-block h-3 w-3 mr-1" />
-                            {exam.examDate}
-                          </span>
-                        </div>
-                        <Button 
-                          onClick={() => setSelectedExam(exam)}
-                          className="w-full bg-career-purple hover:bg-career-blue transition-colors"
-                        >
-                          View Details
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {filteredExams.length === 0 && (
-                  <div className="text-center py-10">
-                    <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No Exams Found</h3>
-                    <p className="text-gray-500">
-                      Try adjusting your search criteria.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </TabsContent>
+              </TabsContent>
+            ))}
+          </Tabs>
           
-          {/* News Tab */}
-          <TabsContent value="news">
-            <Card className="mb-6">
+          {/* ML Integration Section */}
+          <div className="mt-8">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-career-blue">Latest Education News</CardTitle>
+                <CardTitle>Career Guidance ML Model</CardTitle>
                 <CardDescription>
-                  Stay updated with the latest news about entrance exams, colleges, and education
+                  Our career guidance system uses machine learning to provide personalized career recommendations.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex space-x-2 mb-6 overflow-x-auto pb-2">
-                  {["All", "Exam Updates", "Scholarships", "Results", "Admissions"].map((cat) => (
-                    <Button
-                      key={cat}
-                      variant={newsFilter === cat ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setNewsFilter(cat)}
-                      className={newsFilter === cat ? "bg-career-purple hover:bg-career-blue" : ""}
-                    >
-                      {cat}
-                    </Button>
-                  ))}
-                </div>
-                
-                <div className="space-y-4">
-                  {filteredNews.map((news) => (
-                    <Card key={news.id} className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold text-career-blue">{news.title}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{news.content}</p>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              <span className="text-xs bg-career-lightpurple text-career-purple px-2 py-1 rounded-full">
-                                {news.category}
-                              </span>
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                                Source: {news.source}
-                              </span>
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                                {formatDate(news.date)}
-                              </span>
-                            </div>
-                          </div>
-                          <a 
-                            href={news.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="ml-4 flex-shrink-0"
-                          >
-                            <Button variant="outline" size="sm" className="flex items-center">
-                              <ExternalLink className="h-4 w-4 mr-1" />
-                              Read More
-                            </Button>
-                          </a>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                
-                {filteredNews.length === 0 && (
-                  <div className="text-center py-8">
-                    <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No News Found</h3>
-                    <p className="text-gray-500">
-                      Try selecting a different category.
-                    </p>
-                  </div>
-                )}
+                <p className="mb-4">
+                  We use a K-Nearest Neighbors (KNN) algorithm trained on student data to match your profile 
+                  with suitable career paths based on your interests, skills, and academic performance.
+                </p>
+                <Button variant="outline" asChild className="flex items-center gap-2">
+                  <a href="https://colab.research.google.com/drive/1MFIlUCMk5cSsUWG2C6Aur1nR2cFjVwYt?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <span>Open ML Model in Google Colab</span>
+                    <ExternalLink size={16} />
+                  </a>
+                </Button>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
+        
+        <div className="w-full md:w-1/4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Latest News & Updates</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {news.map(item => (
+                  <div key={item.id} className="border-b pb-3 last:border-b-0">
+                    <h3 className="font-medium">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.date} • {item.source}</p>
+                    <p className="text-sm mt-1">{item.content}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
 };
 
-// Exam Details Component
-const ExamDetails = ({ exam, onBack }: { exam: any; onBack: () => void }) => {
-  return (
-    <Card className="card-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-2xl text-career-blue">{exam.name}</CardTitle>
-            <CardDescription className="text-lg">{exam.fullName}</CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" onClick={onBack} className="text-gray-500 hover:text-gray-700">
-            ← Back to list
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-semibold text-career-purple mb-2 flex items-center">
-              <BookOpen className="mr-2 h-5 w-5" />
-              Overview
-            </h3>
-            <p className="text-gray-700">{exam.description}</p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              <span className="text-xs bg-career-lightpurple text-career-purple px-2 py-1 rounded-full">
-                {exam.category}
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-career-purple mb-2 flex items-center">
-                <Calendar className="mr-2 h-5 w-5" />
-                Important Dates
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-gray-700">Application Period</span>
-                  <span className="font-medium">{exam.applicationPeriod}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-gray-700">Exam Date</span>
-                  <span className="font-medium">{exam.examDate}</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-career-purple mb-2 flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Eligibility
-              </h3>
-              <p className="text-gray-700">{exam.eligibility}</p>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-career-purple mb-2 flex items-center">
-              <GraduationCap className="mr-2 h-5 w-5" />
-              Exam Pattern
-            </h3>
-            <p className="text-gray-700">{exam.pattern}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-career-purple mb-2">Official Website</h3>
-              <a 
-                href={exam.website} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-career-blue hover:underline flex items-center"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                Visit {exam.name} Official Website
-              </a>
-            </div>
-
-            {exam.hasPreviousPapers && (
-              <div>
-                <h3 className="font-semibold text-career-purple mb-2">Previous Papers</h3>
-                <Button className="bg-career-purple hover:bg-career-blue transition-colors flex items-center">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Previous Papers
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-career-lightblue p-4 rounded-lg">
-            <h3 className="font-semibold text-career-blue mb-2 flex items-center">
-              <AlertCircle className="mr-2 h-5 w-5" />
-              Preparation Tips
-            </h3>
-            <ul className="list-disc pl-5 space-y-1 text-gray-700">
-              <li>Start preparation at least 6 months before the exam</li>
-              <li>Focus on fundamentals and practice regularly</li>
-              <li>Solve previous years' question papers</li>
-              <li>Take mock tests to improve time management</li>
-              <li>Create a study schedule and stick to it</li>
-            </ul>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default Exams;
+export default ExamsPage;

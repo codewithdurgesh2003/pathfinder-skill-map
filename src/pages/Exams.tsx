@@ -162,30 +162,21 @@ const ExamsPage = () => {
                   <div className="p-4 bg-blue-50 rounded-md border border-blue-200">
                     <h3 className="text-blue-800 font-medium mb-2 flex items-center gap-2">
                       <Database size={18} />
-                      How to Use Your Own CSV Dataset
+                      How Our KNN Model Works
                     </h3>
                     <ol className="list-decimal pl-5 space-y-2 text-gray-700">
-                      <li>Prepare your CSV file with student profiles and career outcomes</li>
-                      <li>Required columns: interests, skills, academic performance, and career outcomes</li>
-                      <li>Upload your CSV when prompted in the Google Colab notebook</li>
-                      <li>The model will automatically train on your dataset</li>
-                      <li>You'll see accuracy metrics, charts, and predictions based on your data</li>
+                      <li>We collect student profile data including academic scores, skills, and interests</li>
+                      <li>The model finds similar student profiles using the KNN algorithm</li>
+                      <li>Career recommendations are based on the outcomes of similar students</li>
+                      <li>We calculate match percentages using skill and interest compatibility</li>
+                      <li>The system continuously improves as more students use it</li>
                     </ol>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button variant="outline" asChild className="flex items-center gap-2">
-                      <a href="https://colab.research.google.com/drive/1MFIlUCMk5cSsUWG2C6Aur1nR2cFjVwYt?usp=sharing" target="_blank" rel="noopener noreferrer">
-                        <span>Open ML Model in Google Colab</span>
-                        <ExternalLink size={16} />
-                      </a>
-                    </Button>
-                    
-                    <Button variant="outline" asChild className="flex items-center gap-2">
-                      <a href="https://github.com/your-username/career-recommendation-model/archive/refs/heads/main.zip" download className="flex items-center gap-2">
-                        <FileUp size={16} />
-                        <span>Download Sample Dataset</span>
-                      </a>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <span>Try Career Assessment</span>
+                      <ExternalLink size={16} />
                     </Button>
                   </div>
                 </div>
@@ -218,3 +209,4 @@ const ExamsPage = () => {
 };
 
 export default ExamsPage;
+

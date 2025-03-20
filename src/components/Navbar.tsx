@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Briefcase, GraduationCap, Home, Info, LogOut, User } from "lucide-react";
-import { isUserLoggedIn, getCurrentUser } from "@/utils/dataLoader";
+import { Menu, X, BookOpen, GraduationCap, Home, Info, LogOut, User } from "lucide-react";
+import { isUserLoggedIn, getCurrentUser, logoutUser } from "@/utils/dataLoader";
 import { useToast } from "@/components/ui/use-toast";
 
 const Navbar = () => {
@@ -44,7 +44,7 @@ const Navbar = () => {
   };
   
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
+    logoutUser();
     setIsLoggedIn(false);
     setUserName("");
     toast({
@@ -73,11 +73,11 @@ const Navbar = () => {
               <span>Home</span>
             </Link>
             <Link 
-              to="/careers" 
+              to="/exams" 
               className="flex items-center space-x-1 text-career-gray hover:text-career-purple transition-colors"
             >
-              <Briefcase className="h-4 w-4" />
-              <span>Careers</span>
+              <BookOpen className="h-4 w-4" />
+              <span>Exams</span>
             </Link>
             <Link 
               to="/colleges" 
@@ -138,12 +138,12 @@ const Navbar = () => {
               <span>Home</span>
             </Link>
             <Link 
-              to="/careers" 
+              to="/exams" 
               className="flex items-center space-x-2 py-2 px-3 text-career-gray hover:bg-career-lightpurple rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Briefcase className="h-4 w-4" />
-              <span>Careers</span>
+              <BookOpen className="h-4 w-4" />
+              <span>Exams</span>
             </Link>
             <Link 
               to="/colleges" 

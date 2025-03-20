@@ -16,6 +16,7 @@ import About from "./pages/About";
 import Assessment from "./pages/Assessment";
 import NotFound404 from "./pages/NotFound404";
 import Index from "./pages/Index";
+import Exams from "./pages/Exams";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/career-recommendations" element={<CareerRecommendations />} />
               <Route path="/career-roadmap/:careerId" element={<CareerRoadmap />} />
               <Route path="/colleges" element={<Colleges />} />
+              <Route path="/exams" element={<Exams />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound404 />} />
             </Routes>

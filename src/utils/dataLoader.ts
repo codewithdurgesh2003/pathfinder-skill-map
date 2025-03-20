@@ -1,3 +1,4 @@
+
 /**
  * Utilities for efficiently loading and processing large datasets
  */
@@ -115,4 +116,74 @@ export const logoutUser = () => {
 export const getAllUserProfiles = () => {
   const usersData = localStorage.getItem('userProfiles') || '{}';
   return Object.values(JSON.parse(usersData));
+};
+
+// Python ML Integration Helper
+export const fetchPredictionsFromPython = async (userData: any) => {
+  try {
+    // In production, this would call your Flask/FastAPI backend
+    // For now, simulate the API call
+    console.log("Sending user data to Python ML service:", userData);
+    
+    // Simulate response from Python backend
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          predictions: [
+            { career: "Software Engineer", score: 92 },
+            { career: "Data Scientist", score: 88 },
+            { career: "UX Designer", score: 76 },
+            { career: "Product Manager", score: 71 },
+            { career: "Network Administrator", score: 65 }
+          ],
+          accuracy: 0.85,
+          model: "KNN",
+          features_used: ["interests", "skills", "aptitude_scores"]
+        });
+      }, 1000);
+    });
+  } catch (error) {
+    console.error("Error fetching predictions from Python service:", error);
+    throw error;
+  }
+};
+
+// MongoDB Integration helpers
+export const saveUserDataToMongoDB = async (userData: any) => {
+  try {
+    // In production, this would call your MongoDB API endpoint
+    console.log("Saving user data to MongoDB:", userData);
+    
+    // Simulate successful save
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, message: "User data saved to MongoDB" });
+      }, 500);
+    });
+  } catch (error) {
+    console.error("Error saving to MongoDB:", error);
+    throw error;
+  }
+};
+
+export const getUserDataFromMongoDB = async (email: string) => {
+  try {
+    // In production, this would call your MongoDB API endpoint
+    console.log("Fetching user data from MongoDB for:", email);
+    
+    // Simulate response
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          email,
+          name: "Test User",
+          testResults: [/* ...test results... */],
+          recommendations: [/* ...recommendations... */]
+        });
+      }, 500);
+    });
+  } catch (error) {
+    console.error("Error fetching from MongoDB:", error);
+    throw error;
+  }
 };

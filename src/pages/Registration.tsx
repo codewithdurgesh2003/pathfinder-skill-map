@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import StudentProfileForm from "@/components/StudentProfileForm";
 import UserAuth from "@/components/UserAuth";
-import { isUserLoggedIn, getCurrentUser } from "@/utils/dataLoader";
+import { isUserLoggedIn, getCurrentUser, saveUserProfile, saveUserDataToMongoDB } from "@/utils/dataLoader";
 
 const Registration = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const Registration = () => {
     }
   }, [navigate, toast]);
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
     toast({
       title: "Registration successful!",
       description: "You can now proceed to the aptitude test.",
@@ -50,6 +50,19 @@ const Registration = () => {
         ...currentUser,
         ...data
       }));
+      
+      // Try to save data to MongoDB if backend is set up
+      try {
+        const mongoResponse = await saveUserDataToMongoDB({
+          email: currentUser.email,
+          name: currentUser.name || data.name,
+          ...data
+        });
+        console.log("MongoDB save response:", mongoResponse);
+      } catch (error) {
+        console.log("Error saving to MongoDB (backend may not be running yet):", error);
+        // Continue anyway since we saved to localStorage
+      }
     }
     
     // Save data to localStorage for the current session

@@ -27,6 +27,17 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
   // The first line contains headers
   const headers = lines[0].split(',').map(header => header.trim());
   
+  // Set up mapping for different column names that might be in the CSV
+  const columnMapping: Record<string, string> = {
+    'college name': 'name',
+    'state': 'location',
+    'fees': 'fees',
+    'field': 'field',
+    'rating': 'rating',
+    'admission rate': 'admissionRate',
+    'website': 'website'
+  };
+  
   // Parse each line into a college object
   const colleges: CollegeData[] = [];
   
@@ -56,25 +67,46 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     values.push(currentValue.trim());
     
     // Create a college object using headers as keys
-    const college: any = { id: i }; // Start with an ID
+    const college: Partial<CollegeData> = { id: i }; // Start with an ID
     
+    // Map the CSV headers to our expected property names
     headers.forEach((header, index) => {
       if (index < values.length) {
+        const headerLower = header.toLowerCase();
+        const mappedHeader = columnMapping[headerLower] || headerLower;
         let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
         
-        // Convert rating to number
-        if (header === 'rating') {
-          college[header] = parseFloat(value);
+        if (mappedHeader === 'rating' && value) {
+          college[mappedHeader] = parseFloat(value);
         } else {
-          college[header] = value;
+          college[mappedHeader as keyof CollegeData] = value as any;
         }
       }
     });
+    
+    // Set default values for any missing fields
+    if (!college.rating) college.rating = generateRandomRating();
+    if (!college.admissionRate) college.admissionRate = generateRandomAdmissionRate();
+    if (!college.website) college.website = `https://example.com/${college.name?.toLowerCase().replace(/\s+/g, '')}`;
     
     colleges.push(college as CollegeData);
   }
   
   return colleges;
+};
+
+/**
+ * Generate a random rating between 3.5 and 4.9
+ */
+const generateRandomRating = (): number => {
+  return parseFloat((Math.random() * 1.4 + 3.5).toFixed(1));
+};
+
+/**
+ * Generate a random admission rate between 10% and 60%
+ */
+const generateRandomAdmissionRate = (): string => {
+  return `${Math.floor(Math.random() * 50 + 10)}%`;
 };
 
 /**

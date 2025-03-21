@@ -41,14 +41,14 @@ const exams = [
     officialWebsite: "https://jeemain.nta.nic.in/"
   },
   {
-    id: "cet",
-    title: "CET (Common Entrance Test)",
-    description: "State level entrance test for admission to various undergraduate courses in state colleges.",
-    applicationProcess: "Online application through state CET website, document verification, and fee payment.",
-    examPattern: "Multiple choice questions from subjects relevant to the applied course (varies by state and course).",
-    importantDates: "Varies by state, typically held between April-June",
-    eligibility: "10+2 with subjects relevant to the applied course",
-    officialWebsite: "https://cetcell.mahacet.org/" // Example for Maharashtra
+    id: "upsc",
+    title: "UPSC Civil Services Examination",
+    description: "National level examination for recruitment to various Civil Services of the Government of India.",
+    applicationProcess: "Applications typically open in February. The process involves registration, application form filling, uploading documents, and fee payment.",
+    examPattern: "Three stages: Preliminary (objective MCQs), Main (written descriptive), and Interview (personality test).",
+    importantDates: "Registration: Feb-Mar, Prelims: May-Jun, Mains: Sep, Interview: Mar-May, Results: May-Jun",
+    eligibility: "Bachelor's degree in any discipline from a recognized university, age between 21-32 years with relaxation for reserved categories",
+    officialWebsite: "https://upsc.gov.in/"
   },
   {
     id: "cat",
@@ -59,6 +59,36 @@ const exams = [
     importantDates: "Registration: Aug-Sept, Exam: Nov-Dec, Results: Jan",
     eligibility: "Bachelor's degree with at least 50% marks or equivalent CGPA",
     officialWebsite: "https://iimcat.ac.in/"
+  },
+  {
+    id: "clat",
+    title: "CLAT (Common Law Admission Test)",
+    description: "National level entrance exam for admission to undergraduate and postgraduate law programs.",
+    applicationProcess: "Online application through CLAT website, document verification, and fee payment.",
+    examPattern: "2-hour test with 150 multiple-choice questions on English, Current Affairs, Legal Reasoning, Logical Reasoning, and Quantitative Techniques.",
+    importantDates: "Registration: Jan, Exam: May, Results: June",
+    eligibility: "For UG: 10+2 with at least 45% marks (40% for SC/ST). For PG: LLB degree with at least 50% marks",
+    officialWebsite: "https://consortiumofnlus.ac.in/"
+  },
+  {
+    id: "nata",
+    title: "NATA (National Aptitude Test in Architecture)",
+    description: "National level entrance exam for admission to B.Arch programs in India.",
+    applicationProcess: "Online application through NATA website, document submission, and fee payment.",
+    examPattern: "3-hour test with multiple-choice questions, diagrammatic reasoning, and drawing test to evaluate aesthetic sensitivity, drawing skills, and architectural awareness.",
+    importantDates: "Registration: Jan-Feb, Exam: Apr-Jul (multiple sessions), Results: Within 20 days of exam",
+    eligibility: "10+2 with Mathematics as a subject and at least 50% aggregate marks",
+    officialWebsite: "https://nata.in/"
+  },
+  {
+    id: "cet",
+    title: "CET (Common Entrance Test)",
+    description: "State level entrance test for admission to various undergraduate courses in state colleges.",
+    applicationProcess: "Online application through state CET website, document verification, and fee payment.",
+    examPattern: "Multiple choice questions from subjects relevant to the applied course (varies by state and course).",
+    importantDates: "Varies by state, typically held between April-June",
+    eligibility: "10+2 with subjects relevant to the applied course",
+    officialWebsite: "https://cetcell.mahacet.org/" // Example for Maharashtra
   }
 ];
 
@@ -122,26 +152,26 @@ const fallbackNews = [
   },
   {
     id: 5,
-    title: "State CETs to Consider Board Marks for 2024 Admissions",
+    title: "UPSC Civil Services Prelims Date Announced",
     publishedAt: "2024-10-01",
-    source: { name: "Higher Education Department" },
-    content: "Various state education departments have announced that Common Entrance Tests for 2024 will consider board exam marks in addition to entrance test scores for final merit lists.",
+    source: { name: "UPSC" },
+    content: "The Union Public Service Commission has announced the preliminary examination date for Civil Services Examination 2024. Candidates can download admit cards two weeks before the exam.",
     url: "#"
   },
   {
     id: 6,
-    title: "Top Engineering Colleges Announce New Admission Criteria",
+    title: "NATA 2024 to Include New Design Aptitude Section",
     publishedAt: "2024-09-28",
-    source: { name: "Engineering Council" },
-    content: "Several top engineering institutes have revised their admission criteria for the upcoming academic year, giving more weightage to project work and practical skills.",
+    source: { name: "Council of Architecture" },
+    content: "The National Aptitude Test in Architecture will include a new section on Design Aptitude from 2024 onwards to better assess candidates' creative and design thinking abilities.",
     url: "#"
   },
   {
     id: 7,
-    title: "Medical Council Introduces New NEET Counseling Process",
+    title: "CLAT 2024 Registration Begins Next Month",
     publishedAt: "2024-09-25",
-    source: { name: "Medical Council of India" },
-    content: "The Medical Council has introduced a new online counseling process for NEET qualified candidates to streamline the admission process and reduce waiting time.",
+    source: { name: "Consortium of NLUs" },
+    content: "The Consortium of National Law Universities has announced that registrations for CLAT 2024 will begin next month. The exam is expected to be held in May 2024.",
     url: "#"
   },
   {
@@ -181,7 +211,7 @@ const ExamsPage = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-2/3">
           <Tabs defaultValue={exams[0].id} onValueChange={(value) => setSelectedExam(exams.find(exam => exam.id === value) || exams[0])}>
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 mb-4">
               {exams.map(exam => (
                 <TabsTrigger key={exam.id} value={exam.id}>{exam.id.toUpperCase()}</TabsTrigger>
               ))}

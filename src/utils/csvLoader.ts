@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for loading and parsing CSV data
  */
@@ -63,10 +64,10 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
         
         // Convert rating to number
         if (header === 'rating') {
-          value = parseFloat(value);
+          college[header] = parseFloat(value);
+        } else {
+          college[header] = value;
         }
-        
-        college[header] = value;
       }
     });
     

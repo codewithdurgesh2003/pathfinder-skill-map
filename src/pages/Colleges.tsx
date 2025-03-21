@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,278 +24,67 @@ import {
   MapPin, 
   Search,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Upload
 } from "lucide-react";
-
-// College data from CSV
-const collegesData = [
-  {
-    id: 1,
-    name: "Andhra University College of Arts and Commerce",
-    location: "Andhra Pradesh",
-    field: "BA",
-    fees: "₹25,000 / year",
-    rating: 4.5,
-    admissionRate: "22%",
-    website: "https://example.com/andhrauniversity",
-  },
-  {
-    id: 2,
-    name: "Sri Venkateswara University",
-    location: "Andhra Pradesh",
-    field: "BA",
-    fees: "₹24,000 / year",
-    rating: 4.3,
-    admissionRate: "25%",
-    website: "https://example.com/srivenkateswara",
-  },
-  {
-    id: 3,
-    name: "Acharya Nagarjuna University",
-    location: "Andhra Pradesh",
-    field: "BA",
-    fees: "₹18,000 / year",
-    rating: 4.2,
-    admissionRate: "30%",
-    website: "https://example.com/nagarjuna",
-  },
-  {
-    id: 4,
-    name: "GITAM University",
-    location: "Andhra Pradesh",
-    field: "BBA",
-    fees: "₹1,25,000 / year",
-    rating: 4.7,
-    admissionRate: "15%",
-    website: "https://example.com/gitam",
-  },
-  {
-    id: 5,
-    name: "Andhra University",
-    location: "Andhra Pradesh",
-    field: "BBA",
-    fees: "₹60,000 / year",
-    rating: 4.4,
-    admissionRate: "20%",
-    website: "https://example.com/andhrauniv",
-  },
-  {
-    id: 6,
-    name: "KL University",
-    location: "Andhra Pradesh",
-    field: "BBA",
-    fees: "₹1,10,000 / year",
-    rating: 4.6,
-    admissionRate: "18%",
-    website: "https://example.com/kluniversity",
-  },
-  {
-    id: 7,
-    name: "Andhra University",
-    location: "Andhra Pradesh",
-    field: "BCom",
-    fees: "₹50,000 / year",
-    rating: 4.4,
-    admissionRate: "23%",
-    website: "https://example.com/andhrauni",
-  },
-  {
-    id: 8,
-    name: "St. Joseph's College",
-    location: "Andhra Pradesh",
-    field: "BCom",
-    fees: "₹60,000 / year",
-    rating: 4.6,
-    admissionRate: "19%",
-    website: "https://example.com/stjosephap",
-  },
-  {
-    id: 9,
-    name: "Andhra Medical College",
-    location: "Andhra Pradesh",
-    field: "BSc Nursing",
-    fees: "₹40,000 / year",
-    rating: 4.8,
-    admissionRate: "12%",
-    website: "https://example.com/amc",
-  },
-  {
-    id: 10,
-    name: "Rajiv Gandhi University",
-    location: "Arunachal Pradesh",
-    field: "BA",
-    fees: "₹15,000 / year",
-    rating: 4.1,
-    admissionRate: "35%",
-    website: "https://example.com/rgu",
-  },
-  {
-    id: 11,
-    name: "Himalayan University",
-    location: "Arunachal Pradesh",
-    field: "BA",
-    fees: "₹12,000 / year",
-    rating: 4.0,
-    admissionRate: "40%",
-    website: "https://example.com/himalayan",
-  },
-  {
-    id: 12,
-    name: "Himalayan University",
-    location: "Arunachal Pradesh",
-    field: "BBA",
-    fees: "₹70,000 / year",
-    rating: 4.2,
-    admissionRate: "28%",
-    website: "https://example.com/himalayanunibba",
-  },
-  {
-    id: 13,
-    name: "Arunachal University",
-    location: "Arunachal Pradesh",
-    field: "BCom",
-    fees: "₹40,000 / year",
-    rating: 3.9,
-    admissionRate: "45%",
-    website: "https://example.com/arunachaluni",
-  },
-  {
-    id: 14,
-    name: "Cotton University",
-    location: "Assam",
-    field: "BA",
-    fees: "₹16,000 / year",
-    rating: 4.3,
-    admissionRate: "30%",
-    website: "https://example.com/cotton",
-  },
-  {
-    id: 15,
-    name: "Gauhati University",
-    location: "Assam",
-    field: "BA",
-    fees: "₹14,000 / year",
-    rating: 4.4,
-    admissionRate: "28%",
-    website: "https://example.com/gauhati",
-  },
-  {
-    id: 16,
-    name: "Assam Don Bosco University",
-    location: "Assam",
-    field: "BBA",
-    fees: "₹1,10,000 / year",
-    rating: 4.5,
-    admissionRate: "20%",
-    website: "https://example.com/donbosco",
-  },
-  {
-    id: 17,
-    name: "Gauhati University",
-    location: "Assam",
-    field: "BCom",
-    fees: "₹50,000 / year",
-    rating: 4.2,
-    admissionRate: "32%",
-    website: "https://example.com/gauhatiuniv",
-  },
-  {
-    id: 18,
-    name: "Christ University",
-    location: "Karnataka",
-    field: "BA",
-    fees: "₹90,000 / year",
-    rating: 4.8,
-    admissionRate: "15%",
-    website: "https://example.com/christ",
-  },
-  {
-    id: 19,
-    name: "Christ University",
-    location: "Karnataka",
-    field: "BBA",
-    fees: "₹1,30,000 / year",
-    rating: 4.9,
-    admissionRate: "12%",
-    website: "https://example.com/christbba",
-  },
-  {
-    id: 20,
-    name: "St. Xavier's College, Mumbai",
-    location: "Maharashtra",
-    field: "BA",
-    fees: "₹13,900 / year",
-    rating: 4.7,
-    admissionRate: "18%",
-    website: "https://example.com/xaviers",
-  },
-  {
-    id: 21,
-    name: "NMIMS University",
-    location: "Maharashtra",
-    field: "BBA",
-    fees: "₹2,50,000 / year",
-    rating: 4.9,
-    admissionRate: "10%",
-    website: "https://example.com/nmims",
-  },
-  {
-    id: 22,
-    name: "University of Delhi",
-    location: "Delhi",
-    field: "BA",
-    fees: "₹15,000 / year",
-    rating: 4.8,
-    admissionRate: "15%",
-    website: "https://example.com/du",
-  },
-  {
-    id: 23,
-    name: "Loyola College of Arts and Sciences",
-    location: "Tamil Nadu",
-    field: "BBA",
-    fees: "₹1,20,000 / year",
-    rating: 4.7,
-    admissionRate: "18%",
-    website: "https://example.com/loyola",
-  },
-  {
-    id: 24,
-    name: "Stella Maris College",
-    location: "Tamil Nadu",
-    field: "BCom",
-    fees: "₹1,00,000 / year",
-    rating: 4.6,
-    admissionRate: "20%",
-    website: "https://example.com/stella",
-  },
-  {
-    id: 25,
-    name: "St. Xavier's College, Kolkata",
-    location: "West Bengal",
-    field: "BCom",
-    fees: "₹75,000 / year",
-    rating: 4.7,
-    admissionRate: "16%",
-    website: "https://example.com/xavierskolkata",
-  },
-];
-
-// Extract unique fields (degrees)
-const fieldOptions = ["All Degrees", ...new Set(collegesData.map(college => college.field))].sort();
-
-// Extract unique locations (states)
-const locationOptions = ["All Locations", ...new Set(collegesData.map(college => college.location))].sort();
+import { CollegeData, getCollegeData, loadCollegeCsvFile } from "@/utils/csvLoader";
+import { toast } from "sonner";
 
 const Colleges = () => {
+  const [collegesData, setCollegesData] = useState<CollegeData[]>([]);
   const [field, setField] = useState("All Degrees");
   const [location, setLocation] = useState("All Locations");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCollege, setSelectedCollege] = useState<any>(null);
+  const [selectedCollege, setSelectedCollege] = useState<CollegeData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 5;
 
-  // Filter colleges based on selected field, location, and search query
+  useEffect(() => {
+    const loadInitialData = () => {
+      try {
+        const data = getCollegeData();
+        setCollegesData(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error loading college data:", error);
+        toast.error("Failed to load college data");
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, []);
+
+  const fieldOptions = ["All Degrees", ...new Set(collegesData.map(college => college.field))].sort();
+  const locationOptions = ["All Locations", ...new Set(collegesData.map(college => college.location))].sort();
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    
+    if (!file) {
+      return;
+    }
+    
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      toast.error("Please upload a CSV file");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const data = await loadCollegeCsvFile(file);
+      setCollegesData(data);
+      toast.success(`Successfully loaded ${data.length} colleges`);
+    } catch (error) {
+      console.error("Error loading CSV file:", error);
+      toast.error("Failed to parse CSV file. Please check the format.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredColleges = collegesData.filter((college) => {
     const fieldMatch = field === "All Degrees" || college.field === field;
     const locationMatch = location === "All Locations" || college.location === location;
@@ -304,7 +92,6 @@ const Colleges = () => {
     return fieldMatch && locationMatch && searchMatch;
   });
 
-  // Calculate pagination
   const totalPages = Math.ceil(filteredColleges.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedColleges = filteredColleges.slice(startIndex, startIndex + itemsPerPage);
@@ -313,7 +100,7 @@ const Colleges = () => {
     setCurrentPage(page);
   };
 
-  const viewCollegeDetails = (college: any) => {
+  const viewCollegeDetails = (college: CollegeData) => {
     setSelectedCollege(college);
   };
 
@@ -321,13 +108,19 @@ const Colleges = () => {
     setSelectedCollege(null);
   };
 
-  // Get degree display name
   const getDegreeFullName = (shortCode: string) => {
     const degreeMap: {[key: string]: string} = {
       "BA": "Bachelor of Arts",
       "BBA": "Bachelor of Business Administration",
       "BCom": "Bachelor of Commerce",
-      "BSc Nursing": "Bachelor of Science in Nursing"
+      "BSc Nursing": "Bachelor of Science in Nursing",
+      "BTech": "Bachelor of Technology",
+      "MBBS": "Bachelor of Medicine and Bachelor of Surgery",
+      "BDS": "Bachelor of Dental Surgery",
+      "LLB": "Bachelor of Laws",
+      "B.Arch": "Bachelor of Architecture",
+      "B.Ed": "Bachelor of Education",
+      "BHM": "Bachelor of Hotel Management"
     };
     return degreeMap[shortCode] || shortCode;
   };
@@ -341,6 +134,39 @@ const Colleges = () => {
             Find the best colleges and universities across India to pursue your desired degree based on your preferences.
           </p>
         </div>
+
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-md text-career-blue">Upload College Data</CardTitle>
+            <CardDescription>
+              Have your own college dataset? Upload a CSV file with college information.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <label htmlFor="csvUpload" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-md px-4 py-4 flex items-center justify-center gap-2 hover:border-career-purple transition-colors">
+                    <Upload className="h-5 w-5 text-career-purple" />
+                    <span>Upload CSV File</span>
+                  </div>
+                  <input 
+                    id="csvUpload" 
+                    type="file" 
+                    accept=".csv" 
+                    className="hidden" 
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">
+                  Expected columns: name, location, field, fees, rating, admissionRate, website
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="mb-8">
           <CardHeader>
@@ -397,7 +223,11 @@ const Colleges = () => {
           </CardContent>
         </Card>
 
-        {selectedCollege ? (
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-career-purple"></div>
+          </div>
+        ) : selectedCollege ? (
           <Card className="card-shadow">
             <CardHeader className="pb-2">
               <div className="flex justify-between">
@@ -528,7 +358,6 @@ const Colleges = () => {
               </Table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center mt-6">
                 <div className="flex items-center space-x-2">
@@ -569,7 +398,7 @@ const Colleges = () => {
           </>
         )}
 
-        {filteredColleges.length === 0 && (
+        {filteredColleges.length === 0 && !isLoading && (
           <div className="text-center py-10">
             <GraduationCap className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-600 mb-2">No Colleges Found</h3>

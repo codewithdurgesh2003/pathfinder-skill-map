@@ -1,4 +1,3 @@
-
 /**
  * Career Guidance System - Complete Setup Guide
  * 
@@ -499,11 +498,56 @@ This feedback loop creates a self-improving system that gets more accurate over 
 use the platform and provide feedback on their career recommendations.
 `;
 
+// Setup guide content
+export const setupGuideContent = [
+  {
+    title: "Importing Your College Dataset",
+    steps: [
+      {
+        title: "Prepare Your College Data",
+        description: "Format your college data in a CSV file with the following columns: name, location, field, fees, rating, admissionRate, website.",
+        code: `Example CSV format:
+name,location,field,fees,rating,admissionRate,website
+"Delhi University","Delhi","BA","₹15,000 / year",4.7,"18%","https://du.ac.in"
+"IIT Bombay","Maharashtra","BTech","₹2,20,000 / year",4.9,"1%","https://iitb.ac.in"`,
+      },
+      {
+        title: "Import Data via the Colleges Page",
+        description: "Navigate to the Colleges page and use the CSV upload feature to import your dataset.",
+        code: null,
+      },
+      {
+        title: "Data Caching",
+        description: "The imported college data will be cached in the browser's localStorage for 24 hours, so you don't need to upload it every time.",
+        code: null,
+      },
+      {
+        title: "Programmatic Import",
+        description: "For larger datasets or server-side integration, you can modify the csvLoader.ts utility to fetch data from your backend API.",
+        code: `// Example of fetching from an API endpoint
+export const fetchCollegesFromApi = async () => {
+  try {
+    const response = await fetch('/api/colleges');
+    if (!response.ok) throw new Error('Failed to fetch');
+    const data = await response.json();
+    cacheData('collegesData', data, 60 * 24);
+    return data;
+  } catch (error) {
+    console.error('Error fetching colleges:', error);
+    return fallbackCollegeData;
+  }
+};`,
+      },
+    ],
+  },
+];
+
 // Export all sections
 export default {
   systemOverview,
   knnExplanation,
   knnModelSetup,
   backendSetup,
-  improvingSystem
+  improvingSystem,
+  setupGuideContent
 };

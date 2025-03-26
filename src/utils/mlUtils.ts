@@ -1,4 +1,3 @@
-
 import { StudentData } from "../data/studentData";
 import { UserProfile } from "../services/careerRecommendationService";
 
@@ -121,4 +120,3 @@ export const recommendationWeights = {
   aptitudeMatch: 0.2,   // 20% from aptitude test performance (new category)
   interestMatch: 0.1,   // 10% from matching interests (decreased from 0.3)
 };
-

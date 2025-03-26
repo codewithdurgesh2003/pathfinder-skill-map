@@ -172,7 +172,7 @@ const FileUploader = ({
           )}
           
           {uploadSuccess && (
-            <Alert variant="success" className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900">
+            <Alert variant="default" className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900">
               <Check className="h-4 w-4" />
               <AlertTitle>Success</AlertTitle>
               <AlertDescription>File processed successfully!</AlertDescription>

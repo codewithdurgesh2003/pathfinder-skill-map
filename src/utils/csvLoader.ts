@@ -28,7 +28,7 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
   const headers = lines[0].split(',').map(header => header.trim());
   
   // Set up mapping for different column names that might be in the CSV
-  const columnMapping: Record<string, string> = {
+  const columnMapping: Record<string, keyof CollegeData> = {
     'college name': 'name',
     'state': 'location',
     'fees': 'fees',
@@ -67,19 +67,19 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     values.push(currentValue.trim());
     
     // Create a college object using headers as keys
-    const college: Partial<CollegeData> = { id: i }; // Start with an ID
+    const college: CollegeData = { id: i } as CollegeData; // Start with an ID
     
     // Map the CSV headers to our expected property names
     headers.forEach((header, index) => {
       if (index < values.length) {
         const headerLower = header.toLowerCase();
-        const mappedHeader = columnMapping[headerLower] || headerLower;
+        const mappedHeader = columnMapping[headerLower] || headerLower as keyof CollegeData;
         let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
         
         if (mappedHeader === 'rating' && value) {
-          college[mappedHeader as keyof CollegeData] = parseFloat(value) as any;
-        } else {
-          college[mappedHeader as keyof CollegeData] = value as any;
+          college[mappedHeader] = parseFloat(value);
+        } else if (mappedHeader in college) {
+          college[mappedHeader] = value;
         }
       }
     });
@@ -89,7 +89,7 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     if (!college.admissionRate) college.admissionRate = generateRandomAdmissionRate();
     if (!college.website) college.website = `https://example.com/${college.name?.toLowerCase().replace(/\s+/g, '')}`;
     
-    colleges.push(college as CollegeData);
+    colleges.push(college);
   }
   
   return colleges;

@@ -57,8 +57,16 @@ const Colleges = () => {
     loadInitialData();
   }, []);
 
-  const fieldOptions = ["All Degrees", ...new Set(collegesData.map(college => college.field))].sort();
-  const locationOptions = ["All Locations", ...new Set(collegesData.map(college => college.location))].sort();
+  // Ensure we have valid arrays of options with "All" options first
+  const fieldOptions = (() => {
+    const uniqueFields = [...new Set(collegesData.map(college => college.field || "").filter(Boolean))];
+    return ["All Degrees", ...uniqueFields.sort()];
+  })();
+
+  const locationOptions = (() => {
+    const uniqueLocations = [...new Set(collegesData.map(college => college.location || "").filter(Boolean))];
+    return ["All Locations", ...uniqueLocations.sort()];
+  })();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,11 +94,14 @@ const Colleges = () => {
     }
   };
 
+  // Case-insensitive filtering
   const filteredColleges = collegesData.filter((college) => {
-    const fieldMatch = field === "All Degrees" || college.field === field;
-    const locationMatch = location === "All Locations" || college.location === location;
+    const fieldMatch = field === "All Degrees" || (college.field && college.field === field);
+    const locationMatch = location === "All Locations" || (college.location && college.location === location);
     // Fix: Add null check for college.name before calling toLowerCase()
-    const searchMatch = college.name ? college.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+    const searchMatch = !searchQuery || 
+      (college.name && college.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
     return fieldMatch && locationMatch && searchMatch;
   });
 
@@ -163,7 +174,7 @@ const Colleges = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-gray-500">
-                  Expected columns: name, location, field, fees, rating, admissionRate, website
+                  Expected columns: Field, College Name, State, Fees
                 </p>
               </div>
             </div>
@@ -186,8 +197,8 @@ const Colleges = () => {
                     <SelectValue placeholder="Select degree" />
                   </SelectTrigger>
                   <SelectContent>
-                    {fieldOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
+                    {fieldOptions.map((option, index) => (
+                      <SelectItem key={`field-${index}`} value={option}>
                         {option === "All Degrees" ? option : getDegreeFullName(option)}
                       </SelectItem>
                     ))}
@@ -201,8 +212,8 @@ const Colleges = () => {
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>
                   <SelectContent>
-                    {locationOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
+                    {locationOptions.map((option, index) => (
+                      <SelectItem key={`location-${index}`} value={option}>
                         {option}
                       </SelectItem>
                     ))}

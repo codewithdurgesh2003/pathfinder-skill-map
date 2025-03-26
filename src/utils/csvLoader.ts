@@ -38,6 +38,8 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     'website': 'website'
   };
   
+  console.log("CSV Headers:", headers);
+  
   // Parse each line into a college object
   const colleges: CollegeData[] = [];
   
@@ -76,6 +78,8 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
         const mappedHeader = columnMapping[headerLower] || headerLower as keyof CollegeData;
         let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
         
+        console.log(`Mapping header '${header}' (${headerLower}) to '${mappedHeader}', value: '${value}'`);
+        
         if (mappedHeader === 'rating' && value) {
           college[mappedHeader] = parseFloat(value);
         } else if (mappedHeader in columnMapping || mappedHeader in college) {
@@ -84,6 +88,26 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
         }
       }
     });
+    
+    // Handle specific column mappings for the user's CSV format
+    // Field,College Name,State,Fees
+    if (headers.some(h => h.toLowerCase() === 'field') && 
+        headers.some(h => h.toLowerCase() === 'college name') && 
+        headers.some(h => h.toLowerCase() === 'state') && 
+        headers.some(h => h.toLowerCase() === 'fees')) {
+      
+      headers.forEach((header, index) => {
+        if (index < values.length) {
+          const headerLower = header.toLowerCase();
+          let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
+          
+          if (headerLower === 'field') college.field = value;
+          else if (headerLower === 'college name') college.name = value;
+          else if (headerLower === 'state') college.location = value;
+          else if (headerLower === 'fees') college.fees = value;
+        }
+      });
+    }
     
     // Set default values for any missing fields
     if (!college.rating) college.rating = generateRandomRating();
@@ -94,9 +118,16 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
       college.website = `https://example.com/${safeName}`;
     }
     
+    // Ensure all required fields have at least some value
+    if (!college.name) college.name = `College ${i}`;
+    if (!college.location) college.location = "Unknown Location";
+    if (!college.field) college.field = "General Studies";
+    if (!college.fees) college.fees = "Contact for details";
+    
     colleges.push(college as CollegeData);
   }
   
+  console.log("Parsed colleges:", colleges);
   return colleges;
 };
 
@@ -124,6 +155,7 @@ export const loadCollegeCsvFile = async (file: File): Promise<CollegeData[]> => 
     reader.onload = (event) => {
       try {
         const csvText = event.target?.result as string;
+        console.log("Raw CSV content:", csvText);
         const colleges = parseCollegeCsv(csvText);
         
         // Cache the colleges data
@@ -131,6 +163,7 @@ export const loadCollegeCsvFile = async (file: File): Promise<CollegeData[]> => 
         
         resolve(colleges);
       } catch (error) {
+        console.error("Error parsing CSV:", error);
         reject(error);
       }
     };

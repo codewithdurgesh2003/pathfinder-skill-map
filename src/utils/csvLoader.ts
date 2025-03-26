@@ -88,7 +88,11 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     // Set default values for any missing fields
     if (!college.rating) college.rating = generateRandomRating();
     if (!college.admissionRate) college.admissionRate = generateRandomAdmissionRate();
-    if (!college.website) college.website = `https://example.com/${college.name?.toLowerCase().replace(/\s+/g, '')}`;
+    // Fix potential undefined name issue with null check
+    if (!college.website) {
+      const safeName = college.name ? college.name.toLowerCase().replace(/\s+/g, '') : `college${i}`;
+      college.website = `https://example.com/${safeName}`;
+    }
     
     colleges.push(college as CollegeData);
   }

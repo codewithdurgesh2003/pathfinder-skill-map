@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,7 +89,8 @@ const Colleges = () => {
   const filteredColleges = collegesData.filter((college) => {
     const fieldMatch = field === "All Degrees" || college.field === field;
     const locationMatch = location === "All Locations" || college.location === location;
-    const searchMatch = college.name.toLowerCase().includes(searchQuery.toLowerCase());
+    // Fix: Add null check for college.name before calling toLowerCase()
+    const searchMatch = college.name ? college.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
     return fieldMatch && locationMatch && searchMatch;
   });
 

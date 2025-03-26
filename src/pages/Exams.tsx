@@ -1,16 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, AlertCircle } from "lucide-react";
+import { ExternalLink, AlertCircle, Book, Calendar, FileText, Award, GraduationCap } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 // Exam data with field categorization
 const exams = [
@@ -133,10 +133,7 @@ const fetchLatestNews = async () => {
     // We'll use a mock response or you can implement a backend proxy
     // For production, use a backend proxy or server-side API call
     
-    // Simulating API call failure to use fallback data
-    throw new Error('Using fallback news data');
-    
-    // Original API call code, kept for reference
+    // Example of how to use a real news API (commented out)
     /*
     const response = await fetch(
       `https://newsapi.org/v2/everything?q=entrance+exam+education+college&sortBy=publishedAt&language=en&pageSize=8&apiKey=YOUR_API_KEY_HERE`
@@ -149,8 +146,12 @@ const fetchLatestNews = async () => {
     const data = await response.json();
     return data.articles;
     */
+    
+    // Using fallback news data
+    console.info("Using fallback news data");
+    return fallbackNews;
   } catch (error) {
-    console.log("Using fallback news data");
+    console.error("Error fetching news:", error);
     // Return fallback news if API fails
     return fallbackNews;
   }
@@ -235,6 +236,26 @@ const fallbackNews = [
 // Get unique field values for our filter
 const uniqueFields = [...new Set(exams.map(exam => exam.field))].sort();
 
+// Function to get the appropriate icon for each exam field
+const getFieldIcon = (field: string) => {
+  switch (field) {
+    case "Engineering":
+      return <FileText className="h-5 w-5" />;
+    case "Medical":
+      return <Book className="h-5 w-5" />;
+    case "Management":
+      return <GraduationCap className="h-5 w-5" />;
+    case "Law":
+      return <Award className="h-5 w-5" />;
+    case "Civil Services":
+      return <GraduationCap className="h-5 w-5" />;
+    case "Architecture":
+      return <FileText className="h-5 w-5" />;
+    default:
+      return <Calendar className="h-5 w-5" />;
+  }
+};
+
 const ExamsPage = () => {
   const [selectedField, setSelectedField] = useState<string>("All");
   const [selectedExam, setSelectedExam] = useState(exams[0]);
@@ -292,7 +313,7 @@ const ExamsPage = () => {
             </div>
           </div>
 
-          {/* Field-wise exams table view */}
+          {/* Field-wise exams card grid view */}
           <div className="mb-6">
             <Card>
               <CardHeader>
@@ -304,42 +325,45 @@ const ExamsPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Exam</TableHead>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredExams.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center">No exams found for the selected field</TableCell>
-                        </TableRow>
-                      ) : (
-                        filteredExams.map(exam => (
-                          <TableRow key={exam.id}>
-                            <TableCell className="font-medium">{exam.title.split('(')[0]}</TableCell>
-                            <TableCell>{exam.field}</TableCell>
-                            <TableCell className="max-w-md">{exam.description}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => setSelectedExam(exam)}
-                              >
-                                View Details
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                {filteredExams.length === 0 ? (
+                  <div className="text-center py-6">
+                    <p>No exams found for the selected field</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredExams.map(exam => (
+                      <Card key={exam.id} className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+                        <div className={`h-2 w-full bg-${exam.field === "Engineering" ? "blue" : exam.field === "Medical" ? "green" : exam.field === "Management" ? "purple" : exam.field === "Law" ? "amber" : "slate"}-500`}></div>
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex-1">
+                              <CardTitle className="text-base font-semibold line-clamp-1">{exam.title.split('(')[0]}</CardTitle>
+                              <Badge variant="outline" className="mt-1">
+                                <span className="flex items-center gap-1">
+                                  {getFieldIcon(exam.field)}
+                                  {exam.field}
+                                </span>
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pb-2 flex-grow">
+                          <p className="text-sm text-muted-foreground line-clamp-2">{exam.description}</p>
+                        </CardContent>
+                        <CardFooter className="pt-0">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setSelectedExam(exam)}
+                          >
+                            View Details
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

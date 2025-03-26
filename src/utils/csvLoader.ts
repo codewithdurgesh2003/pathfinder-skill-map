@@ -77,7 +77,7 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
         let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
         
         if (mappedHeader === 'rating' && value) {
-          college[mappedHeader] = parseFloat(value);
+          college[mappedHeader as keyof CollegeData] = parseFloat(value) as any;
         } else {
           college[mappedHeader as keyof CollegeData] = value as any;
         }

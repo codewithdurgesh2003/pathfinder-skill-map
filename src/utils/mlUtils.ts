@@ -114,3 +114,11 @@ export const calculateContentSimilarity = (
   // Normalize by user features length
   return matchScore / userFeatures.length;
 };
+
+// Updated recommendation weights as per user request
+export const recommendationWeights = {
+  skillMatch: 0.7,      // 70% of the score comes from matching skills (increased from 0.5)
+  aptitudeMatch: 0.2,   // 20% from aptitude test performance (new category)
+  interestMatch: 0.1,   // 10% from matching interests (decreased from 0.3)
+};
+

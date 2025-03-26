@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +56,6 @@ const Colleges = () => {
     loadInitialData();
   }, []);
 
-  // Ensure we have valid arrays of options with "All" options first
   const fieldOptions = (() => {
     const uniqueFields = [...new Set(collegesData.map(college => college.field || "").filter(Boolean))];
     return ["All Degrees", ...uniqueFields.sort()];
@@ -86,6 +84,11 @@ const Colleges = () => {
       const data = await loadCollegeCsvFile(file);
       setCollegesData(data);
       toast.success(`Successfully loaded ${data.length} colleges`);
+      
+      setField("All Degrees");
+      setLocation("All Locations");
+      setSearchQuery("");
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error loading CSV file:", error);
       toast.error("Failed to parse CSV file. Please check the format.");
@@ -94,11 +97,10 @@ const Colleges = () => {
     }
   };
 
-  // Case-insensitive filtering
   const filteredColleges = collegesData.filter((college) => {
     const fieldMatch = field === "All Degrees" || (college.field && college.field === field);
     const locationMatch = location === "All Locations" || (college.location && college.location === location);
-    // Fix: Add null check for college.name before calling toLowerCase()
+    
     const searchMatch = !searchQuery || 
       (college.name && college.name.toLowerCase().includes(searchQuery.toLowerCase()));
     

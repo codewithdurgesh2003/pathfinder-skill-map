@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for loading and parsing CSV data
  */
@@ -26,17 +25,6 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
   
   // The first line contains headers
   const headers = lines[0].split(',').map(header => header.trim());
-  
-  // Set up mapping for different column names that might be in the CSV
-  const columnMapping: Record<string, keyof CollegeData> = {
-    'college name': 'name',
-    'state': 'location',
-    'fees': 'fees',
-    'field': 'field',
-    'rating': 'rating',
-    'admission rate': 'admissionRate',
-    'website': 'website'
-  };
   
   console.log("CSV Headers:", headers);
   
@@ -68,63 +56,43 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     // Add the last value
     values.push(currentValue.trim());
     
-    // Create a college object using headers as keys
-    const college: Partial<CollegeData> = { id: i }; // Start with an ID
+    // Create a college object with default values
+    const college: CollegeData = {
+      id: i,
+      name: `College ${i}`,
+      location: "Unknown Location",
+      field: "General Studies",
+      fees: "Contact for details",
+      rating: generateRandomRating(),
+      admissionRate: generateRandomAdmissionRate(),
+      website: ""
+    };
     
-    // Map the CSV headers to our expected property names
-    headers.forEach((header, index) => {
-      if (index < values.length) {
-        const headerLower = header.toLowerCase();
-        const mappedHeader = columnMapping[headerLower] || headerLower as keyof CollegeData;
-        let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
+    // Try to map the values based on the format: Field,College Name,State,Fees
+    for (let j = 0; j < headers.length; j++) {
+      if (j < values.length) {
+        const headerLower = headers[j].toLowerCase().trim();
+        const value = values[j].replace(/^"|"$/g, '').trim(); // Remove quotes
         
-        console.log(`Mapping header '${header}' (${headerLower}) to '${mappedHeader}', value: '${value}'`);
+        console.log(`Processing header '${headers[j]}' (${headerLower}) with value: '${value}'`);
         
-        if (mappedHeader === 'rating' && value) {
-          college[mappedHeader] = parseFloat(value);
-        } else if (mappedHeader in columnMapping || mappedHeader in college) {
-          // Only set the property if it's a valid key for CollegeData
-          (college as any)[mappedHeader] = value;
+        if (headerLower === 'field' || headerLower.includes('field')) {
+          college.field = value;
+        } else if (headerLower === 'college name' || headerLower.includes('college') || headerLower.includes('name')) {
+          college.name = value;
+        } else if (headerLower === 'state' || headerLower.includes('location') || headerLower.includes('state')) {
+          college.location = value;
+        } else if (headerLower === 'fees' || headerLower.includes('fee') || headerLower.includes('cost')) {
+          college.fees = value;
         }
       }
-    });
-    
-    // Handle specific column mappings for the user's CSV format
-    // Field,College Name,State,Fees
-    if (headers.some(h => h.toLowerCase() === 'field') && 
-        headers.some(h => h.toLowerCase() === 'college name') && 
-        headers.some(h => h.toLowerCase() === 'state') && 
-        headers.some(h => h.toLowerCase() === 'fees')) {
-      
-      headers.forEach((header, index) => {
-        if (index < values.length) {
-          const headerLower = header.toLowerCase();
-          let value = values[index].replace(/^"|"$/g, ''); // Remove quotes
-          
-          if (headerLower === 'field') college.field = value;
-          else if (headerLower === 'college name') college.name = value;
-          else if (headerLower === 'state') college.location = value;
-          else if (headerLower === 'fees') college.fees = value;
-        }
-      });
     }
     
-    // Set default values for any missing fields
-    if (!college.rating) college.rating = generateRandomRating();
-    if (!college.admissionRate) college.admissionRate = generateRandomAdmissionRate();
-    // Fix potential undefined name issue with null check
-    if (!college.website) {
-      const safeName = college.name ? college.name.toLowerCase().replace(/\s+/g, '') : `college${i}`;
-      college.website = `https://example.com/${safeName}`;
-    }
+    // Generate website URL from college name (ensuring it's not undefined)
+    const safeName = college.name ? college.name.toLowerCase().replace(/\s+/g, '') : `college${i}`;
+    college.website = `https://example.com/${safeName}`;
     
-    // Ensure all required fields have at least some value
-    if (!college.name) college.name = `College ${i}`;
-    if (!college.location) college.location = "Unknown Location";
-    if (!college.field) college.field = "General Studies";
-    if (!college.fees) college.fees = "Contact for details";
-    
-    colleges.push(college as CollegeData);
+    colleges.push(college);
   }
   
   console.log("Parsed colleges:", colleges);

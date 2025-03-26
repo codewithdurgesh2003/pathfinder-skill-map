@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Upload, Check, AlertCircle, FileType } from "lucide-react";
+import { Upload, Check, AlertCircle, FileType, Info } from "lucide-react";
 import { loadCollegeCsvFile } from "@/utils/csvLoader";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -116,7 +116,20 @@ const FileUploader = ({
       </CardHeader>
       <CardContent>
         <div className="grid w-full items-center gap-4">
-          <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-12 text-center">
+          <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900">
+            <Info className="h-4 w-4" />
+            <AlertTitle>How to upload files</AlertTitle>
+            <AlertDescription>
+              <p>Unlike Python, browser applications can't directly access your file system. You need to select a file to upload:</p>
+              <ol className="list-decimal list-inside mt-2 ml-2 space-y-1">
+                <li>Click "Select file" to browse your computer</li>
+                <li>Select your CSV file</li>
+                <li>Click "Upload & Process" to load the data</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+          
+          <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 text-center mt-2">
             <div className="mb-4">
               {file ? (
                 <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-full">
@@ -142,7 +155,7 @@ const FileUploader = ({
                   Drag & drop your CSV file, or click to browse
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  File must be in CSV format
+                  File must be in CSV format with headers in the first row
                 </p>
               </div>
             )}

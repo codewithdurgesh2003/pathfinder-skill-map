@@ -67,7 +67,7 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     values.push(currentValue.trim());
     
     // Create a college object using headers as keys
-    const college: CollegeData = { id: i } as CollegeData; // Start with an ID
+    const college: Partial<CollegeData> = { id: i }; // Start with an ID
     
     // Map the CSV headers to our expected property names
     headers.forEach((header, index) => {
@@ -78,8 +78,9 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
         
         if (mappedHeader === 'rating' && value) {
           college[mappedHeader] = parseFloat(value);
-        } else if (mappedHeader in college) {
-          college[mappedHeader] = value;
+        } else if (mappedHeader in columnMapping || mappedHeader in college) {
+          // Only set the property if it's a valid key for CollegeData
+          (college as any)[mappedHeader] = value;
         }
       }
     });
@@ -89,7 +90,7 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
     if (!college.admissionRate) college.admissionRate = generateRandomAdmissionRate();
     if (!college.website) college.website = `https://example.com/${college.name?.toLowerCase().replace(/\s+/g, '')}`;
     
-    colleges.push(college);
+    colleges.push(college as CollegeData);
   }
   
   return colleges;

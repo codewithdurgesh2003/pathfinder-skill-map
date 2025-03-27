@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, AlertCircle, Book, Calendar, FileText, Award, GraduationCap } from "lucide-react";
+import { ExternalLink, AlertCircle, Book, Calendar, FileText, Award, GraduationCap, BookOpen, Briefcase, List } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
@@ -11,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
-// Exam data with field categorization
 const exams = [
   {
     id: "gate",
@@ -126,39 +125,60 @@ const exams = [
   }
 ];
 
-// News API integration
-const fetchLatestNews = async () => {
+const fetchLatestNews = async (category = "all") => {
   try {
-    // Since the direct API call is failing due to CORS and API plan limitations
-    // We'll use a mock response or you can implement a backend proxy
-    // For production, use a backend proxy or server-side API call
+    console.log("Fetching news for category:", category);
     
-    // Example of how to use a real news API (commented out)
-    /*
-    const response = await fetch(
-      `https://newsapi.org/v2/everything?q=entrance+exam+education+college&sortBy=publishedAt&language=en&pageSize=8&apiKey=YOUR_API_KEY_HERE`
-    );
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (!response.ok) {
-      throw new Error('News API request failed');
-    }
-    
-    const data = await response.json();
-    return data.articles;
-    */
-    
-    // Using fallback news data
-    console.info("Using fallback news data");
-    return fallbackNews;
+    return categoryNewsMap[category] || fallbackNews;
   } catch (error) {
     console.error("Error fetching news:", error);
-    // Return fallback news if API fails
+    toast.error("Failed to fetch latest news updates");
     return fallbackNews;
   }
 };
 
-// Fallback news data
-const fallbackNews = [
+const educationNews = [
+  {
+    id: 1,
+    title: "New Education Policy Implementation Across Universities",
+    publishedAt: "2024-10-18",
+    source: { name: "Education Today" },
+    content: "The Ministry of Education has announced full implementation of the National Education Policy across all universities starting next academic year. The policy aims to transform the educational landscape with flexible degree options and multidisciplinary approach.",
+    url: "#",
+    category: "Education"
+  },
+  {
+    id: 2,
+    title: "Digital Learning Platforms See 200% Growth Post-Pandemic",
+    publishedAt: "2024-10-17",
+    source: { name: "EdTech Review" },
+    content: "Online education platforms have reported continued growth even after the pandemic restrictions were lifted. Students are increasingly preferring hybrid learning models that combine classroom and digital instruction.",
+    url: "#",
+    category: "Education"
+  },
+  {
+    id: 3,
+    title: "Top Universities Announce Scholarship Programs for Rural Students",
+    publishedAt: "2024-10-14",
+    source: { name: "Higher Education Chronicle" },
+    content: "Leading universities have collectively announced scholarship programs aimed specifically at students from rural backgrounds to increase diversity and provide equal opportunities in higher education.",
+    url: "#",
+    category: "Education"
+  },
+  {
+    id: 4,
+    title: "Global Education Summit to be Held in New Delhi Next Month",
+    publishedAt: "2024-10-12",
+    source: { name: "International Education News" },
+    content: "New Delhi will host the Global Education Summit bringing together education ministers and policy experts from over 50 countries to discuss the future of education and international collaboration.",
+    url: "#",
+    category: "Education"
+  }
+];
+
+const examNews = [
   {
     id: 1,
     title: "NEET 2024 Registration Opens Next Week",
@@ -166,7 +186,7 @@ const fallbackNews = [
     source: { name: "Education Times" },
     content: "The National Testing Agency has announced that NEET 2024 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents.",
     url: "#",
-    category: "Medical"
+    category: "Exams"
   },
   {
     id: 2,
@@ -175,7 +195,7 @@ const fallbackNews = [
     source: { name: "Education Ministry" },
     content: "The Ministry of Education has announced that JEE Main 2024 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams.",
     url: "#",
-    category: "Engineering"
+    category: "Exams"
   },
   {
     id: 3,
@@ -184,59 +204,89 @@ const fallbackNews = [
     source: { name: "IIM Bangalore" },
     content: "IIM Bangalore, the conducting body for CAT 2024, has extended the registration deadline by one week due to technical issues faced by candidates.",
     url: "#",
-    category: "Management"
+    category: "Exams"
   },
   {
     id: 4,
-    title: "New Changes in GATE 2024 Exam Pattern",
+    title: "GATE 2024 Exam Pattern Changes Announced",
     publishedAt: "2024-10-05",
     source: { name: "IIT Delhi" },
     content: "IIT Delhi has announced significant changes to the GATE 2024 exam pattern, including the introduction of new subjects and modifications to the marking scheme.",
     url: "#",
-    category: "Engineering"
+    category: "Exams"
   },
   {
     id: 5,
-    title: "UPSC Civil Services Prelims Date Announced",
-    publishedAt: "2024-10-01",
-    source: { name: "UPSC" },
-    content: "The Union Public Service Commission has announced the preliminary examination date for Civil Services Examination 2024. Candidates can download admit cards two weeks before the exam.",
-    url: "#",
-    category: "Civil Services"
-  },
-  {
-    id: 6,
-    title: "NATA 2024 to Include New Design Aptitude Section",
-    publishedAt: "2024-09-28",
-    source: { name: "Council of Architecture" },
-    content: "The National Aptitude Test in Architecture will include a new section on Design Aptitude from 2024 onwards to better assess candidates' creative and design thinking abilities.",
-    url: "#",
-    category: "Architecture"
-  },
-  {
-    id: 7,
     title: "CLAT 2024 Registration Begins Next Month",
     publishedAt: "2024-09-25",
     source: { name: "Consortium of NLUs" },
     content: "The Consortium of National Law Universities has announced that registrations for CLAT 2024 will begin next month. The exam is expected to be held in May 2024.",
     url: "#",
-    category: "Law"
-  },
-  {
-    id: 8,
-    title: "Education Ministry Launches New Scholarship for Entrance Exam Toppers",
-    publishedAt: "2024-09-20",
-    source: { name: "Ministry of Education" },
-    content: "The Education Ministry has announced a new scholarship program for students who score in the top 1% in national entrance examinations to encourage academic excellence.",
-    url: "#",
-    category: "Various"
+    category: "Exams"
   }
 ];
 
-// Get unique field values for our filter
-const uniqueFields = [...new Set(exams.map(exam => exam.field))].sort();
+const careerNews = [
+  {
+    id: 1,
+    title: "AI and Machine Learning Jobs See 300% Growth in Demand",
+    publishedAt: "2024-10-16",
+    source: { name: "Career Insights" },
+    content: "The demand for professionals skilled in artificial intelligence and machine learning has tripled over the past year, with companies across sectors looking to implement AI solutions.",
+    url: "#",
+    category: "Career"
+  },
+  {
+    id: 2,
+    title: "Remote Work Opportunities Continue to Expand in Tech Industry",
+    publishedAt: "2024-10-13",
+    source: { name: "Tech Careers Today" },
+    content: "Major tech companies are maintaining and expanding their remote work policies, opening up opportunities for professionals regardless of geographical location.",
+    url: "#",
+    category: "Career"
+  },
+  {
+    id: 3,
+    title: "Healthcare Sector to Create 1 Million New Jobs by 2026",
+    publishedAt: "2024-10-09",
+    source: { name: "Healthcare Career Network" },
+    content: "The healthcare industry is projected to create over one million new jobs in the next two years, with particular demand for nursing, mental health, and telehealth professionals.",
+    url: "#",
+    category: "Career"
+  },
+  {
+    id: 4,
+    title: "Green Energy Careers Boom as Sustainability Becomes Priority",
+    publishedAt: "2024-10-07",
+    source: { name: "Sustainable Future" },
+    content: "Careers in renewable energy, sustainability management, and environmental engineering are seeing unprecedented growth as companies commit to carbon neutrality goals.",
+    url: "#",
+    category: "Career"
+  },
+  {
+    id: 5,
+    title: "Skill-Based Hiring on the Rise, Degrees Becoming Less Important",
+    publishedAt: "2024-10-03",
+    source: { name: "Future of Work" },
+    content: "More employers are focusing on skills and practical capabilities rather than formal degrees, with many tech companies eliminating degree requirements for technical positions.",
+    url: "#",
+    category: "Career"
+  }
+];
 
-// Function to get the appropriate icon for each exam field
+const fallbackNews = [
+  ...examNews,
+  ...educationNews,
+  ...careerNews
+].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+const categoryNewsMap = {
+  "all": fallbackNews,
+  "Education": educationNews,
+  "Exams": examNews,
+  "Career": careerNews
+};
+
 const getFieldIcon = (field: string) => {
   switch (field) {
     case "Engineering":
@@ -259,27 +309,22 @@ const getFieldIcon = (field: string) => {
 const ExamsPage = () => {
   const [selectedField, setSelectedField] = useState<string>("All");
   const [selectedExam, setSelectedExam] = useState(exams[0]);
-  const [newsFilter, setNewsFilter] = useState<string>("All");
+  const [newsCategory, setNewsCategory] = useState<string>("all");
 
-  // Filter exams by selected field
   const filteredExams = selectedField === "All" 
     ? exams 
     : exams.filter(exam => exam.field === selectedField);
 
-  // Fetch news using React Query
-  const { data: newsArticles, isLoading, isError } = useQuery({
-    queryKey: ['examNews'],
-    queryFn: fetchLatestNews,
-    staleTime: 1000 * 60 * 60, // 1 hour
+  const { data: newsArticles, isLoading, isError, refetch } = useQuery({
+    queryKey: ['examNews', newsCategory],
+    queryFn: () => fetchLatestNews(newsCategory),
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 
-  // Filter news by selected category
-  const filteredNews = newsFilter === "All"
-    ? (newsArticles || fallbackNews)
-    : (newsArticles || fallbackNews).filter(
-        (item: any) => item.category === newsFilter || !item.category
-      );
+  useEffect(() => {
+    refetch();
+  }, [newsCategory, refetch]);
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -289,6 +334,19 @@ const ExamsPage = () => {
       day: 'numeric' 
     });
   }
+
+  const getNewsCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Education":
+        return <BookOpen className="h-4 w-4" />;
+      case "Exams":
+        return <FileText className="h-4 w-4" />;
+      case "Career":
+        return <Briefcase className="h-4 w-4" />;
+      default:
+        return <List className="h-4 w-4" />;
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -313,7 +371,6 @@ const ExamsPage = () => {
             </div>
           </div>
 
-          {/* Field-wise exams card grid view */}
           <div className="mb-6">
             <Card>
               <CardHeader>
@@ -368,7 +425,6 @@ const ExamsPage = () => {
             </Card>
           </div>
 
-          {/* Selected Exam Details */}
           <Card>
             <CardHeader>
               <CardTitle>{selectedExam.title}</CardTitle>
@@ -422,21 +478,18 @@ const ExamsPage = () => {
           <Card className="h-full flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                Latest Education News & Updates
+                Latest Education & Career News
                 {isError && <AlertCircle className="h-5 w-5 text-destructive" />}
               </CardTitle>
               <div className="w-full">
-                <Select value={newsFilter} onValueChange={setNewsFilter}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Filter News" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All News</SelectItem>
-                    {uniqueFields.map(field => (
-                      <SelectItem key={field} value={field}>{field}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Tabs defaultValue="all" onValueChange={setNewsCategory}>
+                  <TabsList className="grid grid-cols-4 w-full">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="Education">Education</TabsTrigger>
+                    <TabsTrigger value="Exams">Exams</TabsTrigger>
+                    <TabsTrigger value="Career">Career</TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
@@ -451,46 +504,55 @@ const ExamsPage = () => {
               )}
               
               <ScrollArea className="h-[500px] w-full pr-4">
-                <div className="space-y-4">
-                  {isLoading ? (
-                    Array(5).fill(0).map((_, i) => (
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {Array(5).fill(0).map((_, i) => (
                       <div key={i} className="border-b pb-3 last:border-b-0 animate-pulse">
                         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
                         <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/3 mb-2"></div>
                         <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
                       </div>
-                    ))
-                  ) : (
-                    filteredNews.length > 0 ? (
-                      filteredNews.map((item: any, index: number) => (
-                        <div key={index} className="border-b pb-3 last:border-b-0">
-                          <h3 className="font-medium hover:text-blue-600 transition-colors">
-                            <a href={item.url} target="_blank" rel="noopener noreferrer">
-                              {item.title}
-                            </a>
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDate(item.publishedAt)} • {item.source.name} 
-                            {item.category && <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{item.category}</span>}
-                          </p>
-                          <p className="text-sm mt-1 line-clamp-2">
-                            {item.content?.split(" ").slice(0, 20).join(" ")}...
-                          </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {newsArticles && newsArticles.length > 0 ? (
+                      newsArticles.map((item: any, index: number) => (
+                        <div key={index} className="border-b pb-3 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-900 p-2 rounded-md transition-colors">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-1 p-1 bg-blue-100 dark:bg-blue-900 rounded">
+                              {getNewsCategoryIcon(item.category || "All")}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium hover:text-blue-600 transition-colors">
+                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                  {item.title}
+                                </a>
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(item.publishedAt)} • {item.source.name} 
+                                {item.category && <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{item.category}</span>}
+                              </p>
+                              <p className="text-sm mt-1 line-clamp-2">
+                                {item.content?.split(" ").slice(0, 20).join(" ")}...
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       ))
                     ) : (
                       <div className="text-center py-4">
                         <p>No news found for the selected category.</p>
                       </div>
-                    )
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="mt-6">
                   <Separator className="my-4" />
                   <div className="text-center">
                     <Button variant="outline" className="w-full">
-                      View All Education News
+                      View All News
                     </Button>
                   </div>
                 </div>

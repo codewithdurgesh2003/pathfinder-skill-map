@@ -128,73 +128,6 @@ const exams = [
 
 const uniqueFields = [...new Set(exams.map(exam => exam.field))];
 
-const fetchLatestNews = async (category = "all") => {
-  try {
-    console.log("Fetching news for category:", category);
-    
-    const apiKey = "YOUR_API_KEY"; // Replace with actual API key in production
-    
-    const currentDate = new Date().toISOString().split('T')[0];
-    let url;
-    
-    if (category === "all") {
-      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&published_at_gte=${currentDate}`;
-    } else {
-      const keywordMap = {
-        "Education": "education",
-        "Exams": "test+exam+university",
-        "Career": "career+job+employment"
-      };
-      const keyword = keywordMap[category] || "";
-      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&title_contains=${keyword}`;
-    }
-    
-    console.log("Fetching from URL:", url);
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`News API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    const articles = data.results || data || [];
-    return articles.map(article => ({
-      id: article.id,
-      title: article.title,
-      publishedAt: article.published_at || article.publishedAt || new Date().toISOString(),
-      source: { name: article.news_site || article.newsSite || "News Source" },
-      content: article.summary || article.content || "",
-      url: article.url,
-      category: mapToCategory(article.title)
-    }));
-  } catch (error) {
-    console.error("Error fetching news:", error);
-    toast.error("Failed to fetch latest news updates");
-    return fallbackNews;
-  }
-};
-
-const mapToCategory = (title = "") => {
-  title = title.toLowerCase();
-  if (title.includes("exam") || title.includes("test") || title.includes("entrance") || 
-      title.includes("score") || title.includes("grade") || title.includes("jee") || 
-      title.includes("neet") || title.includes("gate")) {
-    return "Exams";
-  } else if (title.includes("education") || title.includes("school") || 
-           title.includes("college") || title.includes("university") || 
-           title.includes("student") || title.includes("learn") || 
-           title.includes("course")) {
-    return "Education";
-  } else if (title.includes("career") || title.includes("job") || 
-           title.includes("employ") || title.includes("work") || 
-           title.includes("profession") || title.includes("skill") || 
-           title.includes("hire")) {
-    return "Career";
-  }
-  return "Education";
-};
-
 const educationNews = [
   {
     id: 1,
@@ -343,6 +276,98 @@ const categoryNewsMap = {
   "Career": careerNews
 };
 
+const fetchLatestNews = async (category = "all") => {
+  try {
+    console.log("Fetching news for category:", category);
+    
+    const apiKey = "YOUR_API_KEY"; // In production, use environment variables
+    
+    const currentDate = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(currentDate.getDate() - 7);
+    const formattedPastDate = pastDate.toISOString().split('T')[0];
+    
+    let url;
+    
+    if (category === "all") {
+      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&published_at_gte=${formattedPastDate}`;
+    } else {
+      const keywordMap = {
+        "Education": "education+university+student+learning",
+        "Exams": "exam+test+entrance+university+college",
+        "Career": "career+job+employment+work+professional"
+      };
+      const keyword = keywordMap[category] || "";
+      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&title_contains=${keyword}`;
+    }
+    
+    console.log("Fetching from URL:", url);
+    const response = await fetch(url, { 
+      signal: AbortSignal.timeout(5000) // Set a timeout to prevent long waits
+    });
+    
+    if (!response.ok) {
+      throw new Error(`News API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const articles = data.results || data || [];
+    
+    if (articles.length > 0) {
+      console.log(`Successfully fetched ${articles.length} articles from API`);
+      return articles.map(article => ({
+        id: article.id,
+        title: article.title,
+        publishedAt: article.published_at || article.publishedAt || new Date().toISOString(),
+        source: { name: article.news_site || article.newsSite || "News Source" },
+        content: article.summary || article.content || "",
+        url: article.url,
+        category: mapToCategory(article.title)
+      }));
+    } else {
+      console.log("No articles found from API, using fallback");
+      throw new Error("No current news available");
+    }
+  } catch (apiError) {
+    console.warn("API fetch failed, using fallback data:", apiError);
+    
+    if (category === "all") {
+      return fallbackNews;
+    } else {
+      return categoryNewsMap[category] || fallbackNews;
+    }
+  } catch (error) {
+    console.error("Error in fetchLatestNews:", error);
+    toast.error("Failed to fetch latest news updates, showing stored news instead");
+    
+    if (category === "all") {
+      return fallbackNews;
+    } else {
+      return categoryNewsMap[category] || fallbackNews;
+    }
+  }
+};
+
+const mapToCategory = (title = "") => {
+  title = title.toLowerCase();
+  if (title.includes("exam") || title.includes("test") || title.includes("entrance") || 
+      title.includes("score") || title.includes("grade") || title.includes("jee") || 
+      title.includes("neet") || title.includes("gate")) {
+    return "Exams";
+  } else if (title.includes("education") || title.includes("school") || 
+           title.includes("college") || title.includes("university") || 
+           title.includes("student") || title.includes("learn") || 
+           title.includes("course")) {
+    return "Education";
+  } else if (title.includes("career") || title.includes("job") || 
+           title.includes("employ") || title.includes("work") || 
+           title.includes("profession") || title.includes("skill") || 
+           title.includes("hire")) {
+    return "Career";
+  }
+  return "Education";
+};
+
 const getFieldIcon = (field: string) => {
   switch (field) {
     case "Engineering":
@@ -418,6 +443,9 @@ const ExamsPage = () => {
         return <List className="h-4 w-4" />;
     }
   };
+
+  const displayedNews = newsArticles || 
+    (newsCategory === "all" ? fallbackNews : categoryNewsMap[newsCategory] || fallbackNews);
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -569,7 +597,7 @@ const ExamsPage = () => {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>
-                    Could not load the latest news. Using fallback data instead.
+                    Could not load the latest news. Showing stored news instead.
                   </AlertDescription>
                 </Alert>
               )}
@@ -587,8 +615,8 @@ const ExamsPage = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {newsArticles && newsArticles.length > 0 ? (
-                      newsArticles.map((item: any, index: number) => (
+                    {displayedNews && displayedNews.length > 0 ? (
+                      displayedNews.map((item: any, index: number) => (
                         <div key={index} className="border-b pb-3 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-900 p-2 rounded-md transition-colors">
                           <div className="flex items-start gap-2">
                             <div className="mt-1 p-1 bg-blue-100 dark:bg-blue-900 rounded">
@@ -620,7 +648,30 @@ const ExamsPage = () => {
                       ))
                     ) : (
                       <div className="text-center py-4">
-                        <p>No news found for the selected category.</p>
+                        <p>No news found for the selected category. Showing stored news instead.</p>
+                        {categoryNewsMap[newsCategory] && categoryNewsMap[newsCategory].map((item: any, index: number) => (
+                          <div key={index} className="border-b pb-3 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-900 p-2 rounded-md transition-colors mt-4">
+                            <div className="flex items-start gap-2">
+                              <div className="mt-1 p-1 bg-blue-100 dark:bg-blue-900 rounded">
+                                {getNewsCategoryIcon(item.category || "All")}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium hover:text-blue-600 transition-colors">
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                    {item.title}
+                                  </a>
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatDate(item.publishedAt)} • {item.source.name} 
+                                  {item.category && <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{item.category}</span>}
+                                </p>
+                                <p className="text-sm mt-1 line-clamp-2">
+                                  {item.content?.split(" ").slice(0, 20).join(" ")}...
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

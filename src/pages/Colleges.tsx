@@ -24,10 +24,9 @@ import {
   MapPin, 
   Search,
   GraduationCap,
-  BookOpen,
-  Upload
+  BookOpen
 } from "lucide-react";
-import { CollegeData, getCollegeData, loadCollegeCsvFile } from "@/utils/csvLoader";
+import { CollegeData, getCollegeData } from "@/utils/csvLoader";
 import { toast } from "sonner";
 
 const Colleges = () => {
@@ -65,37 +64,6 @@ const Colleges = () => {
     const uniqueLocations = [...new Set(collegesData.map(college => college.location || "").filter(Boolean))];
     return ["All Locations", ...uniqueLocations.sort()];
   })();
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    
-    if (!file) {
-      return;
-    }
-    
-    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      toast.error("Please upload a CSV file");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const data = await loadCollegeCsvFile(file);
-      setCollegesData(data);
-      toast.success(`Successfully loaded ${data.length} colleges`);
-      
-      setField("All Degrees");
-      setLocation("All Locations");
-      setSearchQuery("");
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Error loading CSV file:", error);
-      toast.error("Failed to parse CSV file. Please check the format.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const filteredColleges = collegesData.filter((college) => {
     const fieldMatch = field === "All Degrees" || (college.field && college.field === field);
@@ -149,39 +117,6 @@ const Colleges = () => {
             Find the best colleges and universities across India to pursue your desired degree based on your preferences.
           </p>
         </div>
-
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-md text-career-blue">Upload College Data</CardTitle>
-            <CardDescription>
-              Have your own college dataset? Upload a CSV file with college information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <label htmlFor="csvUpload" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md px-4 py-4 flex items-center justify-center gap-2 hover:border-career-purple transition-colors">
-                    <Upload className="h-5 w-5 text-career-purple" />
-                    <span>Upload CSV File</span>
-                  </div>
-                  <input 
-                    id="csvUpload" 
-                    type="file" 
-                    accept=".csv" 
-                    className="hidden" 
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500">
-                  Expected columns: Field, College Name, State, Fees
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         <Card className="mb-8">
           <CardHeader>

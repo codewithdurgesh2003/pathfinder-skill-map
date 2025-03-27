@@ -125,10 +125,21 @@ const exams = [
   }
 ];
 
+const uniqueFields = [...new Set(exams.map(exam => exam.field))];
+
 const fetchLatestNews = async (category = "all") => {
   try {
     console.log("Fetching news for category:", category);
     
+    const apiKey = "YOUR_API_KEY"; // Replace with actual API key in production
+    
+    // For demo purposes, we'll use our mock data but in production this would be:
+    // const url = `https://newsapi.org/v2/top-headlines?country=in&category=${category === 'all' ? '' : category}&apiKey=${apiKey}`;
+    // const response = await fetch(url);
+    // const data = await response.json();
+    // return data.articles;
+    
+    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
     return categoryNewsMap[category] || fallbackNews;
@@ -320,6 +331,7 @@ const ExamsPage = () => {
     queryFn: () => fetchLatestNews(newsCategory),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+    refetchInterval: 1000 * 60 * 15,
   });
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const exams = [
   {
@@ -133,21 +134,65 @@ const fetchLatestNews = async (category = "all") => {
     
     const apiKey = "YOUR_API_KEY"; // Replace with actual API key in production
     
-    // For demo purposes, we'll use our mock data but in production this would be:
-    // const url = `https://newsapi.org/v2/top-headlines?country=in&category=${category === 'all' ? '' : category}&apiKey=${apiKey}`;
-    // const response = await fetch(url);
-    // const data = await response.json();
-    // return data.articles;
+    const currentDate = new Date().toISOString().split('T')[0];
+    let url;
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    if (category === "all") {
+      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&published_at_gte=${currentDate}`;
+    } else {
+      const keywordMap = {
+        "Education": "education",
+        "Exams": "test+exam+university",
+        "Career": "career+job+employment"
+      };
+      const keyword = keywordMap[category] || "";
+      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&title_contains=${keyword}`;
+    }
     
-    return categoryNewsMap[category] || fallbackNews;
+    console.log("Fetching from URL:", url);
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`News API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    const articles = data.results || data || [];
+    return articles.map(article => ({
+      id: article.id,
+      title: article.title,
+      publishedAt: article.published_at || article.publishedAt || new Date().toISOString(),
+      source: { name: article.news_site || article.newsSite || "News Source" },
+      content: article.summary || article.content || "",
+      url: article.url,
+      category: mapToCategory(article.title)
+    }));
   } catch (error) {
     console.error("Error fetching news:", error);
     toast.error("Failed to fetch latest news updates");
     return fallbackNews;
   }
+};
+
+const mapToCategory = (title = "") => {
+  title = title.toLowerCase();
+  if (title.includes("exam") || title.includes("test") || title.includes("entrance") || 
+      title.includes("score") || title.includes("grade") || title.includes("jee") || 
+      title.includes("neet") || title.includes("gate")) {
+    return "Exams";
+  } else if (title.includes("education") || title.includes("school") || 
+           title.includes("college") || title.includes("university") || 
+           title.includes("student") || title.includes("learn") || 
+           title.includes("course")) {
+    return "Education";
+  } else if (title.includes("career") || title.includes("job") || 
+           title.includes("employ") || title.includes("work") || 
+           title.includes("profession") || title.includes("skill") || 
+           title.includes("hire")) {
+    return "Career";
+  }
+  return "Education";
 };
 
 const educationNews = [
@@ -321,16 +366,17 @@ const ExamsPage = () => {
   const [selectedField, setSelectedField] = useState<string>("All");
   const [selectedExam, setSelectedExam] = useState(exams[0]);
   const [newsCategory, setNewsCategory] = useState<string>("all");
+  const [lastFetchTime, setLastFetchTime] = useState(new Date());
 
   const filteredExams = selectedField === "All" 
     ? exams 
     : exams.filter(exam => exam.field === selectedField);
 
   const { data: newsArticles, isLoading, isError, refetch } = useQuery({
-    queryKey: ['examNews', newsCategory],
+    queryKey: ['examNews', newsCategory, lastFetchTime],
     queryFn: () => fetchLatestNews(newsCategory),
     staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchInterval: 1000 * 60 * 15,
   });
 
@@ -338,13 +384,26 @@ const ExamsPage = () => {
     refetch();
   }, [newsCategory, refetch]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLastFetchTime(new Date());
+    }, 1000 * 60 * 60);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
   function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Date unavailable";
+    }
   }
 
   const getNewsCategoryIcon = (category: string) => {
@@ -548,6 +607,13 @@ const ExamsPage = () => {
                               <p className="text-sm mt-1 line-clamp-2">
                                 {item.content?.split(" ").slice(0, 20).join(" ")}...
                               </p>
+                              <div className="mt-2">
+                                <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800">
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                                    Read more <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -563,8 +629,16 @@ const ExamsPage = () => {
                 <div className="mt-6">
                   <Separator className="my-4" />
                   <div className="text-center">
-                    <Button variant="outline" className="w-full">
-                      View All News
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        setLastFetchTime(new Date());
+                        toast.info("Fetching latest news...");
+                        refetch();
+                      }}
+                    >
+                      Refresh News
                     </Button>
                   </div>
                 </div>

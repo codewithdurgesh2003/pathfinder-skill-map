@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -170,46 +171,55 @@ const educationNews = [
 const examNews = [
   {
     id: 1,
-    title: "NEET 2024 Registration Opens Next Week",
-    publishedAt: "2024-10-15",
+    title: "NEET 2025 Registration Opens Next Week",
+    publishedAt: "2025-04-10",
     source: { name: "Education Times" },
-    content: "The National Testing Agency has announced that NEET 2024 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents.",
+    content: "The National Testing Agency has announced that NEET 2025 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents.",
     url: "#",
     category: "Exams"
   },
   {
     id: 2,
-    title: "JEE Main 2024 to be Conducted in Four Sessions",
-    publishedAt: "2024-10-12",
+    title: "JEE Main 2025 to be Conducted in Four Sessions",
+    publishedAt: "2025-04-07",
     source: { name: "Education Ministry" },
-    content: "The Ministry of Education has announced that JEE Main 2024 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams.",
+    content: "The Ministry of Education has announced that JEE Main 2025 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams.",
     url: "#",
     category: "Exams"
   },
   {
     id: 3,
-    title: "CAT 2024 Registration Deadline Extended",
-    publishedAt: "2024-10-10",
+    title: "CAT 2025 Registration Deadline Extended",
+    publishedAt: "2025-04-05",
     source: { name: "IIM Bangalore" },
-    content: "IIM Bangalore, the conducting body for CAT 2024, has extended the registration deadline by one week due to technical issues faced by candidates.",
+    content: "IIM Bangalore, the conducting body for CAT 2025, has extended the registration deadline by one week due to technical issues faced by candidates.",
     url: "#",
     category: "Exams"
   },
   {
     id: 4,
-    title: "GATE 2024 Exam Pattern Changes Announced",
-    publishedAt: "2024-10-05",
+    title: "GATE 2025 Exam Pattern Changes Announced",
+    publishedAt: "2025-04-02",
     source: { name: "IIT Delhi" },
-    content: "IIT Delhi has announced significant changes to the GATE 2024 exam pattern, including the introduction of new subjects and modifications to the marking scheme.",
+    content: "IIT Delhi has announced significant changes to the GATE 2025 exam pattern, including the introduction of new subjects and modifications to the marking scheme.",
     url: "#",
     category: "Exams"
   },
   {
     id: 5,
-    title: "CLAT 2024 Registration Begins Next Month",
-    publishedAt: "2024-09-25",
-    source: { name: "Consortium of NLUs" },
-    content: "The Consortium of National Law Universities has announced that registrations for CLAT 2024 will begin next month. The exam is expected to be held in May 2024.",
+    title: "UPSC Civil Services 2025 Notification Released",
+    publishedAt: "2025-04-01",
+    source: { name: "UPSC" },
+    content: "The Union Public Service Commission has released the notification for Civil Services Examination 2025. The preliminary exam is scheduled for June 2025.",
+    url: "#",
+    category: "Exams"
+  },
+  {
+    id: 6,
+    title: "SSC CGL 2025 Registration to Begin in May",
+    publishedAt: "2025-03-28",
+    source: { name: "Staff Selection Commission" },
+    content: "The Staff Selection Commission has announced that registrations for the Combined Graduate Level Examination 2025 will begin in May, with the tier-1 exam scheduled for August.",
     url: "#",
     category: "Exams"
   }
@@ -219,7 +229,7 @@ const careerNews = [
   {
     id: 1,
     title: "AI and Machine Learning Jobs See 300% Growth in Demand",
-    publishedAt: "2024-10-16",
+    publishedAt: "2025-04-09",
     source: { name: "Career Insights" },
     content: "The demand for professionals skilled in artificial intelligence and machine learning has tripled over the past year, with companies across sectors looking to implement AI solutions.",
     url: "#",
@@ -227,37 +237,37 @@ const careerNews = [
   },
   {
     id: 2,
+    title: "Government Announces 50,000 New Positions in Civil Services",
+    publishedAt: "2025-04-06",
+    source: { name: "Public Sector Career News" },
+    content: "The central government has announced plans to create 50,000 new positions across various civil service departments in the next fiscal year, creating significant opportunities for UPSC aspirants.",
+    url: "#",
+    category: "Career"
+  },
+  {
+    id: 3,
     title: "Remote Work Opportunities Continue to Expand in Tech Industry",
-    publishedAt: "2024-10-13",
+    publishedAt: "2025-04-04",
     source: { name: "Tech Careers Today" },
     content: "Major tech companies are maintaining and expanding their remote work policies, opening up opportunities for professionals regardless of geographical location.",
     url: "#",
     category: "Career"
   },
   {
-    id: 3,
+    id: 4,
     title: "Healthcare Sector to Create 1 Million New Jobs by 2026",
-    publishedAt: "2024-10-09",
+    publishedAt: "2025-03-30",
     source: { name: "Healthcare Career Network" },
     content: "The healthcare industry is projected to create over one million new jobs in the next two years, with particular demand for nursing, mental health, and telehealth professionals.",
     url: "#",
     category: "Career"
   },
   {
-    id: 4,
-    title: "Green Energy Careers Boom as Sustainability Becomes Priority",
-    publishedAt: "2024-10-07",
-    source: { name: "Sustainable Future" },
-    content: "Careers in renewable energy, sustainability management, and environmental engineering are seeing unprecedented growth as companies commit to carbon neutrality goals.",
-    url: "#",
-    category: "Career"
-  },
-  {
     id: 5,
-    title: "Skill-Based Hiring on the Rise, Degrees Becoming Less Important",
-    publishedAt: "2024-10-03",
-    source: { name: "Future of Work" },
-    content: "More employers are focusing on skills and practical capabilities rather than formal degrees, with many tech companies eliminating degree requirements for technical positions.",
+    title: "Railway Recruitment Board Announces Largest Hiring Drive",
+    publishedAt: "2025-03-27",
+    source: { name: "Government Jobs Portal" },
+    content: "The Railway Recruitment Board has announced its largest hiring drive in a decade, with plans to fill over 35,000 positions across various categories in the coming months.",
     url: "#",
     category: "Career"
   }
@@ -280,7 +290,7 @@ const fetchLatestNews = async (category = "all") => {
   try {
     console.log("Fetching news for category:", category);
     
-    const apiKey = "YOUR_API_KEY"; // In production, use environment variables
+    const apiKey = "YOUR_NEWS_API_KEY"; // Replace with your actual API key
     
     const currentDate = new Date();
     const pastDate = new Date();
@@ -290,55 +300,53 @@ const fetchLatestNews = async (category = "all") => {
     let url;
     
     if (category === "all") {
-      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&published_at_gte=${formattedPastDate}`;
+      url = `https://newsapi.org/v2/everything?q=exam OR competitive OR education OR career OR government&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
     } else {
       const keywordMap = {
         "Education": "education+university+student+learning",
-        "Exams": "exam+test+entrance+university+college",
-        "Career": "career+job+employment+work+professional"
+        "Exams": "competitive+exam+entrance+government+upsc+ssc+jee+neet+gate+civil+services",
+        "Career": "career+job+government+recruitment+placement+hiring+opportunity"
       };
       const keyword = keywordMap[category] || "";
-      url = `https://api.spaceflightnewsapi.net/v4/articles?limit=10&title_contains=${keyword}`;
+      url = `https://newsapi.org/v2/everything?q=${keyword}&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
     }
     
     console.log("Fetching from URL:", url);
+    
+    // Set a timeout for the fetch operation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetch(url, { 
-      signal: AbortSignal.timeout(5000) // Set a timeout to prevent long waits
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`News API error: ${response.status}`);
     }
     
     const data = await response.json();
-    const articles = data.results || data || [];
+    const articles = data.articles || [];
     
     if (articles.length > 0) {
       console.log(`Successfully fetched ${articles.length} articles from API`);
       return articles.map(article => ({
-        id: article.id,
+        id: article.url || Math.random().toString(),
         title: article.title,
-        publishedAt: article.published_at || article.publishedAt || new Date().toISOString(),
-        source: { name: article.news_site || article.newsSite || "News Source" },
-        content: article.summary || article.content || "",
-        url: article.url,
-        category: mapToCategory(article.title)
+        publishedAt: article.publishedAt || new Date().toISOString(),
+        source: { name: article.source?.name || "News Source" },
+        content: article.description || article.content || "",
+        url: article.url || "#",
+        category: mapToCategory(article.title, article.description)
       }));
     } else {
       console.log("No articles found from API, using fallback");
       throw new Error("No current news available");
     }
-  } catch (apiError) {
-    console.warn("API fetch failed, using fallback data:", apiError);
-    
-    if (category === "all") {
-      return fallbackNews;
-    } else {
-      return categoryNewsMap[category] || fallbackNews;
-    }
   } catch (error) {
-    console.error("Error in fetchLatestNews:", error);
-    toast.error("Failed to fetch latest news updates, showing stored news instead");
+    console.warn("API fetch failed, using fallback data:", error);
     
     if (category === "all") {
       return fallbackNews;
@@ -348,21 +356,26 @@ const fetchLatestNews = async (category = "all") => {
   }
 };
 
-const mapToCategory = (title = "") => {
-  title = title.toLowerCase();
-  if (title.includes("exam") || title.includes("test") || title.includes("entrance") || 
-      title.includes("score") || title.includes("grade") || title.includes("jee") || 
-      title.includes("neet") || title.includes("gate")) {
+const mapToCategory = (title = "", description = "") => {
+  const text = (title + " " + (description || "")).toLowerCase();
+  
+  if (text.includes("upsc") || text.includes("ssc") || text.includes("civil service") || 
+      text.includes("government exam") || text.includes("competitive exam") || 
+      text.includes("exam") || text.includes("test") || text.includes("entrance") || 
+      text.includes("score") || text.includes("grade") || text.includes("jee") || 
+      text.includes("neet") || text.includes("gate")) {
     return "Exams";
-  } else if (title.includes("education") || title.includes("school") || 
-           title.includes("college") || title.includes("university") || 
-           title.includes("student") || title.includes("learn") || 
-           title.includes("course")) {
+  } else if (text.includes("education") || text.includes("school") || 
+           text.includes("college") || text.includes("university") || 
+           text.includes("student") || text.includes("learn") || 
+           text.includes("course")) {
     return "Education";
-  } else if (title.includes("career") || title.includes("job") || 
-           title.includes("employ") || title.includes("work") || 
-           title.includes("profession") || title.includes("skill") || 
-           title.includes("hire")) {
+  } else if (text.includes("career") || text.includes("job") || 
+           text.includes("employ") || text.includes("work") || 
+           text.includes("profession") || text.includes("skill") || 
+           text.includes("hire") || text.includes("recruitment") ||
+           text.includes("vacancy") || text.includes("position") ||
+           text.includes("opportunity")) {
     return "Career";
   }
   return "Education";
@@ -400,9 +413,9 @@ const ExamsPage = () => {
   const { data: newsArticles, isLoading, isError, refetch } = useQuery({
     queryKey: ['examNews', newsCategory, lastFetchTime],
     queryFn: () => fetchLatestNews(newsCategory),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 15,
+    refetchInterval: 1000 * 60 * 15, // 15 minutes
   });
 
   useEffect(() => {
@@ -412,7 +425,8 @@ const ExamsPage = () => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       setLastFetchTime(new Date());
-    }, 1000 * 60 * 60);
+      console.log("Auto-refreshing news...");
+    }, 1000 * 60 * 60); // 1 hour
     
     return () => clearInterval(intervalId);
   }, []);

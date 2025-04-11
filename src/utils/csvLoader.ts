@@ -68,34 +68,35 @@ export const parseCollegeCsv = (csvText: string): CollegeData[] => {
       website: ""
     };
     
-    // Try to map the values based on the format: Field,College Name,State,Fees
+    // Try to map the values based on common header patterns
     for (let j = 0; j < headers.length; j++) {
       if (j < values.length) {
         const headerLower = headers[j].toLowerCase().trim();
         const value = values[j].replace(/^"|"$/g, '').trim(); // Remove quotes
         
-        console.log(`Processing header '${headers[j]}' (${headerLower}) with value: '${value}'`);
+        // Skip empty values
+        if (!value) continue;
         
-        if (headerLower === 'field' || headerLower.includes('field')) {
+        if (headerLower === 'field' || headerLower.includes('field') || headerLower.includes('degree')) {
           college.field = value;
-        } else if (headerLower === 'college name' || headerLower.includes('college') || headerLower.includes('name')) {
+        } else if (headerLower === 'college' || headerLower.includes('college') || headerLower.includes('name') || headerLower.includes('institution')) {
           college.name = value;
-        } else if (headerLower === 'state' || headerLower.includes('location') || headerLower.includes('state')) {
+        } else if (headerLower === 'state' || headerLower.includes('location') || headerLower.includes('state') || headerLower.includes('place')) {
           college.location = value;
-        } else if (headerLower === 'fees' || headerLower.includes('fee') || headerLower.includes('cost')) {
+        } else if (headerLower === 'fees' || headerLower.includes('fee') || headerLower.includes('cost') || headerLower.includes('tuition')) {
           college.fees = value;
         }
       }
     }
     
     // Generate website URL from college name (ensuring it's not undefined)
-    const safeName = college.name ? college.name.toLowerCase().replace(/\s+/g, '') : `college${i}`;
+    const safeName = college.name ? college.name.toLowerCase().replace(/[^a-z0-9]/g, '') : `college${i}`;
     college.website = `https://example.com/${safeName}`;
     
     colleges.push(college);
   }
   
-  console.log("Parsed colleges:", colleges);
+  console.log(`Parsed ${colleges.length} colleges from CSV`);
   return colleges;
 };
 
@@ -123,12 +124,15 @@ export const loadCollegeCsvFile = async (file: File): Promise<CollegeData[]> => 
     reader.onload = (event) => {
       try {
         const csvText = event.target?.result as string;
-        console.log("Raw CSV content:", csvText);
+        console.log(`Raw CSV content length: ${csvText.length} characters`);
+        console.log(`CSV has ${csvText.split('\n').length} lines`);
+        
         const colleges = parseCollegeCsv(csvText);
         
         // Cache the colleges data
         cacheData('collegesData', colleges, 60 * 24); // Cache for 24 hours
         
+        console.log(`Successfully processed ${colleges.length} colleges`);
         resolve(colleges);
       } catch (error) {
         console.error("Error parsing CSV:", error);
@@ -152,14 +156,16 @@ export const getCollegeData = (): CollegeData[] => {
   const cachedData = getCachedData<CollegeData[]>('collegesData');
   
   if (cachedData && cachedData.length > 0) {
+    console.log(`Retrieved ${cachedData.length} colleges from cache`);
     return cachedData;
   }
   
   // Otherwise return the fallback data
+  console.log(`Using fallback data with ${fallbackCollegeData.length} colleges`);
   return fallbackCollegeData;
 };
 
-// Fallback college data (the same as currently in Colleges.tsx)
+// Fallback college data
 export const fallbackCollegeData: CollegeData[] = [
   {
     id: 1,

@@ -26,6 +26,7 @@ const FileUploader = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dataCount, setDataCount] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +48,7 @@ const FileUploader = ({
     setFile(selectedFile);
     setError(null);
     setUploadSuccess(false);
+    setDataCount(null);
   };
 
   const handleUpload = async () => {
@@ -61,6 +63,7 @@ const FileUploader = ({
       if (uploadType === "colleges") {
         // Process college CSV file
         processedData = await loadCollegeCsvFile(file);
+        setDataCount(processedData.length);
         
         toast({
           title: "Colleges data loaded successfully",
@@ -90,6 +93,7 @@ const FileUploader = ({
       
       // Call the callback with the processed data
       if (onFileUploaded && processedData) {
+        console.log(`Sending ${processedData.length} items to parent component`);
         onFileUploaded(processedData);
       }
       
@@ -188,7 +192,9 @@ const FileUploader = ({
             <Alert variant="default" className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900">
               <Check className="h-4 w-4" />
               <AlertTitle>Success</AlertTitle>
-              <AlertDescription>File processed successfully!</AlertDescription>
+              <AlertDescription>
+                {dataCount ? `${dataCount} records processed successfully!` : 'File processed successfully!'}
+              </AlertDescription>
             </Alert>
           )}
         </div>

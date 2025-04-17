@@ -3,6 +3,7 @@ import { students, StudentData } from "../data/studentData";
 import { recommendationWeights, knnConfig } from "../data/studentOptions";
 import { findKNearestNeighbors, vectorizeProfile, calculateContentSimilarity } from "../utils/mlUtils";
 import { getAllUserProfiles } from "../utils/dataLoader";
+import { getCSVBasedRecommendations } from "@/utils/csvRecommendationEngine";
 
 export interface UserProfile {
   name?: string;
@@ -448,83 +449,8 @@ const getRecommendationsFromSimilarStudents = (similarStudents: StudentData[]): 
  * Now with more varied match percentages
  */
 export const getCareerRecommendations = (userProfile: UserProfile): CareerRecommendation[] => {
-  const recommendations: CareerRecommendation[] = [];
-  
-  // Find similar student profiles using kNN
-  const similarStudents = findSimilarStudents(userProfile);
-  console.log("Similar students:", similarStudents.map(s => s.name));
-  
-  // Get career recommendations based on similar students
-  const similarStudentRecommendations = getRecommendationsFromSimilarStudents(similarStudents);
-  
-  // Track the top career score to normalize percentages
-  let maxCareerScore = 0;
-  const rawScores: {career: Career, score: number}[] = [];
-  
-  for (const career of careers) {
-    // Calculate individual match scores
-    const skillMatchScore = calculateSkillMatch(userProfile.skills, career.requiredSkills);
-    
-    // Get career details or use defaults
-    const details = careerDetails[career.title] || {
-      description: "No detailed description available.",
-      educationPath: "Varies based on specialization",
-      growthOutlook: "Varies",
-      salaryRange: "Varies by location and experience",
-      industries: ["Various"],
-      workEnvironment: ["Various"]
-    };
-    
-    const interestMatchScore = calculateInterestMatch(userProfile.interests, details.industries);
-    const academicMatchScore = calculateAcademicMatch(userProfile.sscPercentage, userProfile.hscPercentage);
-    const workEnvironmentScore = calculateWorkEnvironmentMatch(userProfile.preferredWorkStyle, details.workEnvironment);
-    
-    // Get similar student recommendation score for this career
-    const similarStudentScore = similarStudentRecommendations.get(career.title) || 0;
-    
-    // Apply weighted average using predefined weights
-    const rawMatchScore = 
-      (skillMatchScore * recommendationWeights.skillMatch) +
-      (interestMatchScore * recommendationWeights.interestMatch) +
-      (academicMatchScore * recommendationWeights.academicMatch) +
-      (similarStudentScore * recommendationWeights.similarStudents);
-    
-    // Store raw score for normalization later
-    rawScores.push({career, score: rawMatchScore});
-    
-    // Track maximum score
-    if (rawMatchScore > maxCareerScore) {
-      maxCareerScore = rawMatchScore;
-    }
-  }
-  
-  // Sort by raw score (highest first)
-  rawScores.sort((a, b) => b.score - a.score);
-  
-  // Take top 10 careers and normalize their scores for better distribution
-  rawScores.slice(0, 10).forEach(({career, score}, index) => {
-    // Normalize score as percentage of the highest score
-    // Top match gets 95%, second gets 90%, etc.
-    const normalizedPercentage = Math.round(95 - (index * 5));
-    
-    // Get career details
-    const details = careerDetails[career.title] || {
-      description: "No detailed description available.",
-      educationPath: "Varies based on specialization",
-      growthOutlook: "Varies",
-      salaryRange: "Varies by location and experience",
-      industries: ["Various"],
-      workEnvironment: ["Various"]
-    };
-    
-    recommendations.push({
-      ...career,
-      ...details,
-      matchPercentage: normalizedPercentage
-    });
-  });
-  
-  return recommendations;
+  // Use the CSV-based recommendation engine
+  return getCSVBasedRecommendations(userProfile);
 };
 
 /**

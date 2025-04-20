@@ -31,15 +31,64 @@ export const processCareerCSVData = (colleges: CollegeData[]): CSVCareerProfile[
   return Array.from(careerProfiles.values());
 };
 
-export const getCSVBasedRecommendations = (
+// New function to save recommendations to MongoDB
+export const saveRecommendationsToMongoDB = async (
+  email: string,
+  recommendations: CareerRecommendation[]
+): Promise<boolean> => {
+  try {
+    const apiUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiUrl}/users/${email}/recommendations`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recommendations }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to save recommendations');
+    }
+    
+    const data = await response.json();
+    console.log('Recommendations saved to MongoDB:', data);
+    return true;
+  } catch (error) {
+    console.error('Error saving recommendations to MongoDB:', error);
+    return false;
+  }
+};
+
+// New function to get user profile from MongoDB
+export const getUserProfileFromMongoDB = async (email: string): Promise<any> => {
+  try {
+    const apiUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiUrl}/users/${email}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to get user profile');
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting user profile from MongoDB:', error);
+    // Fall back to local storage
+    const localProfile = localStorage.getItem('userProfile');
+    return localProfile ? JSON.parse(localProfile) : null;
+  }
+};
+
+export const getCSVBasedRecommendations = async (
   userProfile: {
+    email?: string;
     skills: string[];
     interests: string[];
     sscPercentage: string;
     hscPercentage: string;
     preferredWorkStyle?: "remote" | "office" | "hybrid";
   }
-): CareerRecommendation[] => {
+): Promise<CareerRecommendation[]> => {
   // Get college data from CSV
   const collegeData = getCollegeData();
   
@@ -113,6 +162,12 @@ export const getCSVBasedRecommendations = (
   });
   
   // Sort recommendations by match percentage
-  return recommendations.sort((a, b) => b.matchPercentage - a.matchPercentage);
+  const sortedRecommendations = recommendations.sort((a, b) => b.matchPercentage - a.matchPercentage);
+  
+  // Save recommendations to MongoDB if email is provided
+  if (userProfile.email) {
+    await saveRecommendationsToMongoDB(userProfile.email, sortedRecommendations);
+  }
+  
+  return sortedRecommendations;
 };
-

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, TrendingUp } from "lucide-react";
+import { ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, TrendingUp, AlertCircle, ExternalLink, List } from "lucide-react";
 import { 
   getCareerRecommendations, 
   analyzeRecommendations, 
@@ -12,6 +12,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { loadLargeDataset, cacheData, getCachedData, getCurrentUser } from "@/utils/dataLoader";
+import { useQuery } from "@tanstack/react-query";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 const CareerRecommendations = () => {
   const navigate = useNavigate();
@@ -20,6 +24,8 @@ const CareerRecommendations = () => {
   const [analysis, setAnalysis] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("careers");
+  const [lastFetchTime, setLastFetchTime] = useState(new Date());
+  const [newsCategory, setNewsCategory] = useState<string>("all");
 
   // Clear cached recommendations to ensure fresh results on each visit
   useEffect(() => {
@@ -148,6 +154,309 @@ const CareerRecommendations = () => {
     name: skill,
     value: careers.filter(career => career.requiredSkills.includes(skill)).length
   })) || [];
+
+  const fetchLatestNews = async (category = "all") => {
+    try {
+      console.log("Fetching news for category:", category);
+      
+      const apiKey = "YOUR_NEWS_API_KEY"; // Replace with your actual API key
+      
+      const currentDate = new Date();
+      const pastDate = new Date();
+      pastDate.setDate(currentDate.getDate() - 7);
+      const formattedPastDate = pastDate.toISOString().split('T')[0];
+      
+      let url;
+      
+      if (category === "all") {
+        url = `https://newsapi.org/v2/everything?q=exam OR competitive OR education OR career OR government&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
+      } else {
+        const keywordMap = {
+          "Education": "education+university+student+learning",
+          "Exams": "competitive+exam+entrance+government+upsc+ssc+jee+neet+gate+civil+services",
+          "Career": "career+job+government+recruitment+placement+hiring+opportunity"
+        };
+        const keyword = keywordMap[category] || "";
+        url = `https://newsapi.org/v2/everything?q=${keyword}&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
+      }
+      
+      console.log("Fetching from URL:", url);
+      
+      // Set a timeout for the fetch operation
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch(url, { 
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`News API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const articles = data.articles || [];
+      
+      if (articles.length > 0) {
+        console.log(`Successfully fetched ${articles.length} articles from API`);
+        return articles.map(article => ({
+          id: article.url || Math.random().toString(),
+          title: article.title,
+          publishedAt: article.publishedAt || new Date().toISOString(),
+          source: { name: article.source?.name || "News Source" },
+          content: article.description || article.content || "",
+          url: article.url || "#",
+          category: mapToCategory(article.title, article.description)
+        }));
+      } else {
+        console.log("No articles found from API, using fallback");
+        throw new Error("No current news available");
+      }
+    } catch (error) {
+      console.warn("API fetch failed, using fallback data:", error);
+      
+      if (category === "all") {
+        return fallbackNews;
+      } else {
+        return categoryNewsMap[category] || fallbackNews;
+      }
+    }
+  };
+
+  const mapToCategory = (title = "", description = "") => {
+    const text = (title + " " + (description || "")).toLowerCase();
+    
+    if (text.includes("upsc") || text.includes("ssc") || text.includes("civil service") || 
+        text.includes("government exam") || text.includes("competitive exam") || 
+        text.includes("exam") || text.includes("test") || text.includes("entrance") || 
+        text.includes("score") || text.includes("grade") || text.includes("jee") || 
+        text.includes("neet") || text.includes("gate")) {
+      return "Exams";
+    } else if (text.includes("education") || text.includes("school") || 
+             text.includes("college") || text.includes("university") || 
+             text.includes("student") || text.includes("learn") || 
+             text.includes("course")) {
+      return "Education";
+    } else if (text.includes("career") || text.includes("job") || 
+             text.includes("employ") || text.includes("work") || 
+             text.includes("profession") || text.includes("skill") || 
+             text.includes("hire") || text.includes("recruitment") ||
+             text.includes("vacancy") || text.includes("position") ||
+             text.includes("opportunity")) {
+      return "Career";
+    }
+    return "Education";
+  };
+
+  const educationNews = [
+    {
+      id: 1,
+      title: "New Education Policy Implementation Across Universities",
+      publishedAt: "2024-10-18",
+      source: { name: "Education Today" },
+      content: "The Ministry of Education has announced full implementation of the National Education Policy across all universities starting next academic year. The policy aims to transform the educational landscape with flexible degree options and multidisciplinary approach.",
+      url: "#",
+      category: "Education"
+    },
+    {
+      id: 2,
+      title: "Digital Learning Platforms See 200% Growth Post-Pandemic",
+      publishedAt: "2024-10-17",
+      source: { name: "EdTech Review" },
+      content: "Online education platforms have reported continued growth even after the pandemic restrictions were lifted. Students are increasingly preferring hybrid learning models that combine classroom and digital instruction.",
+      url: "#",
+      category: "Education"
+    },
+    {
+      id: 3,
+      title: "Top Universities Announce Scholarship Programs for Rural Students",
+      publishedAt: "2024-10-14",
+      source: { name: "Higher Education Chronicle" },
+      content: "Leading universities have collectively announced scholarship programs aimed specifically at students from rural backgrounds to increase diversity and provide equal opportunities in higher education.",
+      url: "#",
+      category: "Education"
+    },
+    {
+      id: 4,
+      title: "Global Education Summit to be Held in New Delhi Next Month",
+      publishedAt: "2024-10-12",
+      source: { name: "International Education News" },
+      content: "New Delhi will host the Global Education Summit bringing together education ministers and policy experts from over 50 countries to discuss the future of education and international collaboration.",
+      url: "#",
+      category: "Education"
+    }
+  ];
+
+  const examNews = [
+    {
+      id: 1,
+      title: "NEET 2025 Registration Opens Next Week",
+      publishedAt: "2025-04-10",
+      source: { name: "Education Times" },
+      content: "The National Testing Agency has announced that NEET 2025 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents.",
+      url: "#",
+      category: "Exams"
+    },
+    {
+      id: 2,
+      title: "JEE Main 2025 to be Conducted in Four Sessions",
+      publishedAt: "2025-04-07",
+      source: { name: "Education Ministry" },
+      content: "The Ministry of Education has announced that JEE Main 2025 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams.",
+      url: "#",
+      category: "Exams"
+    },
+    {
+      id: 3,
+      title: "CAT 2025 Registration Deadline Extended",
+      publishedAt: "2025-04-05",
+      source: { name: "IIM Bangalore" },
+      content: "IIM Bangalore, the conducting body for CAT 2025, has extended the registration deadline by one week due to technical issues faced by candidates.",
+      url: "#",
+      category: "Exams"
+    },
+    {
+      id: 4,
+      title: "GATE 2025 Exam Pattern Changes Announced",
+      publishedAt: "2025-04-02",
+      source: { name: "IIT Delhi" },
+      content: "IIT Delhi has announced significant changes to the GATE 2025 exam pattern, including the introduction of new subjects and modifications to the marking scheme.",
+      url: "#",
+      category: "Exams"
+    },
+    {
+      id: 5,
+      title: "UPSC Civil Services 2025 Notification Released",
+      publishedAt: "2025-04-01",
+      source: { name: "UPSC" },
+      content: "The Union Public Service Commission has released the notification for Civil Services Examination 2025. The preliminary exam is scheduled for June 2025.",
+      url: "#",
+      category: "Exams"
+    },
+    {
+      id: 6,
+      title: "SSC CGL 2025 Registration to Begin in May",
+      publishedAt: "2025-03-28",
+      source: { name: "Staff Selection Commission" },
+      content: "The Staff Selection Commission has announced that registrations for the Combined Graduate Level Examination 2025 will begin in May, with the tier-1 exam scheduled for August.",
+      url: "#",
+      category: "Exams"
+    }
+  ];
+
+  const careerNews = [
+    {
+      id: 1,
+      title: "AI and Machine Learning Jobs See 300% Growth in Demand",
+      publishedAt: "2025-04-09",
+      source: { name: "Career Insights" },
+      content: "The demand for professionals skilled in artificial intelligence and machine learning has tripled over the past year, with companies across sectors looking to implement AI solutions.",
+      url: "#",
+      category: "Career"
+    },
+    {
+      id: 2,
+      title: "Government Announces 50,000 New Positions in Civil Services",
+      publishedAt: "2025-04-06",
+      source: { name: "Public Sector Career News" },
+      content: "The central government has announced plans to create 50,000 new positions across various civil service departments in the next fiscal year, creating significant opportunities for UPSC aspirants.",
+      url: "#",
+      category: "Career"
+    },
+    {
+      id: 3,
+      title: "Remote Work Opportunities Continue to Expand in Tech Industry",
+      publishedAt: "2025-04-04",
+      source: { name: "Tech Careers Today" },
+      content: "Major tech companies are maintaining and expanding their remote work policies, opening up opportunities for professionals regardless of geographical location.",
+      url: "#",
+      category: "Career"
+    },
+    {
+      id: 4,
+      title: "Healthcare Sector to Create 1 Million New Jobs by 2026",
+      publishedAt: "2025-03-30",
+      source: { name: "Healthcare Career Network" },
+      content: "The healthcare industry is projected to create over one million new jobs in the next two years, with particular demand for nursing, mental health, and telehealth professionals.",
+      url: "#",
+      category: "Career"
+    },
+    {
+      id: 5,
+      title: "Railway Recruitment Board Announces Largest Hiring Drive",
+      publishedAt: "2025-03-27",
+      source: { name: "Government Jobs Portal" },
+      content: "The Railway Recruitment Board has announced its largest hiring drive in a decade, with plans to fill over 35,000 positions across various categories in the coming months.",
+      url: "#",
+      category: "Career"
+    }
+  ];
+
+  const fallbackNews = [
+    ...examNews,
+    ...educationNews,
+    ...careerNews
+  ].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+  const categoryNewsMap = {
+    "all": fallbackNews,
+    "Education": educationNews,
+    "Exams": examNews,
+    "Career": careerNews
+  };
+
+  const { data: newsArticles, isLoading, isError, refetch } = useQuery({
+    queryKey: ['examNews', newsCategory, lastFetchTime],
+    queryFn: () => fetchLatestNews(newsCategory),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 15, // 15 minutes
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [newsCategory, refetch]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLastFetchTime(new Date());
+      console.log("Auto-refreshing news...");
+    }, 1000 * 60 * 60); // 1 hour
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function formatDate(dateString: string) {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Date unavailable";
+    }
+  }
+
+  const getNewsCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Education":
+        return <BookOpen className="h-4 w-4" />;
+      case "Exams":
+        return <FileText className="h-4 w-4" />;
+      case "Career":
+        return <Briefcase className="h-4 w-4" />;
+      default:
+        return <List className="h-4 w-4" />;
+    }
+  };
+
+  const displayedNews = newsArticles || 
+    (newsCategory === "all" ? fallbackNews : categoryNewsMap[newsCategory] || fallbackNews);
 
   return (
     <div className="container mx-auto py-10 px-4">
@@ -363,3 +672,4 @@ const CareerRecommendations = () => {
 };
 
 export default CareerRecommendations;
+

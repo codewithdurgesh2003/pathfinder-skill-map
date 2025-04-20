@@ -448,9 +448,9 @@ const getRecommendationsFromSimilarStudents = (similarStudents: StudentData[]): 
  * Using a weighted average of multiple factors including kNN
  * Now with more varied match percentages
  */
-export const getCareerRecommendations = (userProfile: UserProfile): CareerRecommendation[] => {
+export const getCareerRecommendations = async (userProfile: UserProfile): Promise<CareerRecommendation[]> => {
   // Use the CSV-based recommendation engine
-  return getCSVBasedRecommendations(userProfile);
+  return await getCSVBasedRecommendations(userProfile);
 };
 
 /**

@@ -488,7 +488,7 @@ const ExamsPage = () => {
 
   const handleRefresh = () => {
     setLastFetchTime(new Date());
-    toast.info("Refreshing latest news...");
+    toast("Refreshing latest news...");
     refetch();
   };
 
@@ -647,7 +647,7 @@ const ExamsPage = () => {
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
               {showFallbackNotice && (
-                <Alert variant="warning" className="mb-4">
+                <Alert variant="default" className="mb-4 border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Using Cached News</AlertTitle>
                   <AlertDescription>

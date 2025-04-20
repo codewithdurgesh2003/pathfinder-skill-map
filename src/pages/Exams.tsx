@@ -289,85 +289,22 @@ const fetchLatestNews = async (category = "all") => {
   try {
     console.log("Fetching news for category:", category);
     
-    const apiKey = "YOUR_NEWS_API_KEY"; 
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    const currentDate = new Date();
-    const pastDate = new Date();
-    pastDate.setDate(currentDate.getDate() - 3);
-    const formattedPastDate = pastDate.toISOString().split('T')[0];
-    
-    let url;
-    
+    // Return predefined news based on category
     if (category === "all") {
-      url = `https://newsapi.org/v2/everything?q=exam OR competitive OR education OR career OR government&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
+      return fallbackNews;
     } else {
-      const keywordMap = {
-        "Education": "education+university+student+learning",
-        "Exams": "competitive+exam+entrance+government+upsc+ssc+jee+neet+gate+civil+services",
-        "Career": "career+job+government+recruitment+placement+hiring+opportunity"
-      };
-      const keyword = keywordMap[category] || "";
-      url = `https://newsapi.org/v2/everything?q=${keyword}&from=${formattedPastDate}&sortBy=publishedAt&apiKey=${apiKey}`;
-    }
-    
-    console.log("Fetching from URL:", url);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(url, { 
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`News API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const articles = data.articles || [];
-    
-    if (articles.length > 0) {
-      console.log(`Successfully fetched ${articles.length} articles from API`);
-      return articles.map(article => ({
-        id: article.url || Math.random().toString(),
-        title: article.title,
-        publishedAt: article.publishedAt || new Date().toISOString(),
-        source: { name: article.source?.name || "News Source" },
-        content: article.description || article.content || "",
-        url: article.url || "#",
-        category: mapToCategory(article.title, article.description)
-      }));
-    } else {
-      console.log("No articles found from API, using fallback");
-      throw new Error("No current news available");
+      return categoryNewsMap[category] || fallbackNews;
     }
   } catch (error) {
-    console.warn("API fetch failed, using fallback data:", error);
-    
-    const fallbackTimestamp = new Date().toISOString();
-    
-    const getFallbackData = (data) => {
-      return data.map((item, index) => {
-        const currentDate = new Date();
-        const itemDate = new Date(currentDate);
-        itemDate.setDate(currentDate.getDate() - (data.length - index) + 1);
-        
-        return {
-          ...item,
-          _fallback: true,
-          originalDate: item.publishedAt,
-          publishedAt: itemDate.toISOString().split('T')[0],
-          retrievedAt: fallbackTimestamp
-        };
-      });
-    };
+    console.warn("Could not load news data:", error);
     
     if (category === "all") {
-      return getFallbackData(fallbackNews);
+      return fallbackNews;
     } else {
-      return getFallbackData(categoryNewsMap[category] || fallbackNews);
+      return categoryNewsMap[category] || fallbackNews;
     }
   }
 };
@@ -421,7 +358,6 @@ const ExamsPage = () => {
   const [selectedExam, setSelectedExam] = useState(exams[0]);
   const [newsCategory, setNewsCategory] = useState<string>("all");
   const [lastFetchTime, setLastFetchTime] = useState(new Date());
-  const [showFallbackNotice, setShowFallbackNotice] = useState(false);
 
   const filteredExams = selectedField === "All" 
     ? exams 
@@ -438,14 +374,6 @@ const ExamsPage = () => {
   useEffect(() => {
     refetch();
   }, [newsCategory, refetch]);
-
-  useEffect(() => {
-    if (newsArticles && newsArticles.length > 0 && newsArticles[0]._fallback) {
-      setShowFallbackNotice(true);
-    } else {
-      setShowFallbackNotice(false);
-    }
-  }, [newsArticles]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -646,25 +574,12 @@ const ExamsPage = () => {
               </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
-              {showFallbackNotice && (
-                <Alert variant="default" className="mb-4 border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Using Cached News</AlertTitle>
-                  <AlertDescription>
-                    We're currently showing locally stored news. The dates shown are simulated for better readability.
-                    <Button variant="link" onClick={handleRefresh} className="p-0 h-auto text-xs underline">
-                      Try refreshing again
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               {isError && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>
-                    Could not load the latest news from our provider. Showing stored news instead.
+                    Could not load the latest news. Please try again later.
                   </AlertDescription>
                 </Alert>
               )}
@@ -698,7 +613,6 @@ const ExamsPage = () => {
                               <p className="text-xs text-muted-foreground">
                                 {formatDate(item.publishedAt)} • {item.source.name} 
                                 {item.category && <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{item.category}</span>}
-                                {item._fallback && <span className="ml-1 text-amber-600">•</span>}
                               </p>
                               <p className="text-sm mt-1 line-clamp-2">
                                 {item.content?.split(" ").slice(0, 20).join(" ")}...

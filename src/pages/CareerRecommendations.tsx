@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, TrendingUp, AlertCircle, ExternalLink, List } from "lucide-react";
+import { 
+  ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, 
+  TrendingUp, AlertCircle, ExternalLink, List, FileText 
+} from "lucide-react";
 import { 
   getCareerRecommendations, 
   analyzeRecommendations, 
@@ -22,19 +25,17 @@ const CareerRecommendations = () => {
   const { toast } = useToast();
   const [careers, setCareers] = useState<CareerRecommendation[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("careers");
   const [lastFetchTime, setLastFetchTime] = useState(new Date());
   const [newsCategory, setNewsCategory] = useState<string>("all");
 
-  // Clear cached recommendations to ensure fresh results on each visit
   useEffect(() => {
     localStorage.removeItem("cachedRecommendations");
     localStorage.removeItem("cachedAnalysis");
   }, []);
 
   useEffect(() => {
-    // Check if user has completed the assessment
     const testResults = localStorage.getItem("testResults");
     const userProfile = localStorage.getItem("userProfile");
     const currentUser = getCurrentUser();
@@ -49,35 +50,28 @@ const CareerRecommendations = () => {
       return;
     }
 
-    // Get career recommendations based on user profile
     const fetchRecommendations = async () => {
       try {
         const profile = JSON.parse(userProfile);
         console.log("User profile:", profile);
         
-        // Add username to profile if available
         if (currentUser && currentUser.name) {
           profile.name = currentUser.name;
         }
         
-        // Simulate ML processing delay
         setTimeout(async () => {
           try {
-            // Get recommendations - now properly awaiting the Promise
             const recommendations = await getCareerRecommendations(profile);
             
-            // Only show top 5 recommendations for a better user experience
             const topRecommendations = recommendations.slice(0, 5);
             
-            // Process large dataset if needed
             const processedRecommendations = await loadLargeDataset(topRecommendations);
             setCareers(processedRecommendations);
             
-            // Generate analysis from recommendations
             const insightAnalysis = analyzeRecommendations(processedRecommendations);
             setAnalysis(insightAnalysis);
             
-            setIsLoading(false);
+            setRecommendationsLoading(false);
           } catch (error) {
             console.error("Error processing recommendations:", error);
             toast({
@@ -85,7 +79,7 @@ const CareerRecommendations = () => {
               description: "There was a problem generating your recommendations.",
               variant: "destructive",
             });
-            setIsLoading(false);
+            setRecommendationsLoading(false);
           }
         }, 1500);
       } catch (error) {
@@ -95,7 +89,7 @@ const CareerRecommendations = () => {
           description: "There was a problem generating your recommendations.",
           variant: "destructive",
         });
-        setIsLoading(false);
+        setRecommendationsLoading(false);
       }
     };
 
@@ -103,15 +97,13 @@ const CareerRecommendations = () => {
   }, [navigate, toast]);
 
   const viewRoadmap = (careerId: string) => {
-    // Save selected career to localStorage
     const selectedCareer = careers.find((career) => career.title === careerId);
     localStorage.setItem("selectedCareer", JSON.stringify(selectedCareer));
     
-    // Navigate to roadmap page
     navigate(`/career-roadmap/${careerId}`);
   };
 
-  if (isLoading) {
+  if (recommendationsLoading) {
     return (
       <div className="container mx-auto py-20 px-4 text-center">
         <div className="max-w-lg mx-auto">
@@ -129,7 +121,6 @@ const CareerRecommendations = () => {
     );
   }
 
-  // Prepare data for charts
   const pieChartData = careers.map(career => ({
     name: career.title,
     value: career.matchPercentage
@@ -159,7 +150,7 @@ const CareerRecommendations = () => {
     try {
       console.log("Fetching news for category:", category);
       
-      const apiKey = "YOUR_NEWS_API_KEY"; // Replace with your actual API key
+      const apiKey = "YOUR_NEWS_API_KEY";
       
       const currentDate = new Date();
       const pastDate = new Date();
@@ -182,7 +173,6 @@ const CareerRecommendations = () => {
       
       console.log("Fetching from URL:", url);
       
-      // Set a timeout for the fetch operation
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
@@ -407,12 +397,12 @@ const CareerRecommendations = () => {
     "Career": careerNews
   };
 
-  const { data: newsArticles, isLoading, isError, refetch } = useQuery({
+  const { data: newsArticles, isLoading: newsLoading, isError, refetch } = useQuery({
     queryKey: ['examNews', newsCategory, lastFetchTime],
     queryFn: () => fetchLatestNews(newsCategory),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 15, // 15 minutes
+    refetchInterval: 1000 * 60 * 15,
   });
 
   useEffect(() => {
@@ -423,7 +413,7 @@ const CareerRecommendations = () => {
     const intervalId = setInterval(() => {
       setLastFetchTime(new Date());
       console.log("Auto-refreshing news...");
-    }, 1000 * 60 * 60); // 1 hour
+    }, 1000 * 60 * 60);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -503,7 +493,6 @@ const CareerRecommendations = () => {
                       <div className="flex items-center bg-career-lightpurple px-3 py-1 rounded-full">
                         <Star className="h-4 w-4 text-career-purple mr-1 fill-career-purple" />
                         <span className="font-semibold text-career-purple">
-                          {/* Calculate a more varied percentage based on position */}
                           {Math.max(70, 95 - (index * 5))}% Match
                         </span>
                       </div>
@@ -672,4 +661,3 @@ const CareerRecommendations = () => {
 };
 
 export default CareerRecommendations;
-

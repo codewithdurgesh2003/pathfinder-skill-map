@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast";
 import { 
   ArrowRight, Award, BookOpen, Briefcase, Building, BarChart, Star, 
-  TrendingUp, AlertCircle, ExternalLink, List, FileText 
+  TrendingUp, AlertCircle, ExternalLink, List, FileText, RefreshCw 
 } from "lucide-react";
 import { 
   getCareerRecommendations, 
@@ -19,16 +19,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 const CareerRecommendations = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [careers, setCareers] = useState<CareerRecommendation[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("careers");
   const [lastFetchTime, setLastFetchTime] = useState(new Date());
   const [newsCategory, setNewsCategory] = useState<string>("all");
+  const [showFallbackNotice, setShowFallbackNotice] = useState(false);
 
   useEffect(() => {
     localStorage.removeItem("cachedRecommendations");
@@ -41,7 +43,7 @@ const CareerRecommendations = () => {
     const currentUser = getCurrentUser();
     
     if (!userProfile) {
-      toast({
+      uiToast({
         title: "Error",
         description: "Please complete the assessment first.",
         variant: "destructive",
@@ -74,7 +76,7 @@ const CareerRecommendations = () => {
             setRecommendationsLoading(false);
           } catch (error) {
             console.error("Error processing recommendations:", error);
-            toast({
+            uiToast({
               title: "Error",
               description: "There was a problem generating your recommendations.",
               variant: "destructive",
@@ -84,7 +86,7 @@ const CareerRecommendations = () => {
         }, 1500);
       } catch (error) {
         console.error("Error processing recommendations:", error);
-        toast({
+        uiToast({
           title: "Error",
           description: "There was a problem generating your recommendations.",
           variant: "destructive",
@@ -94,7 +96,7 @@ const CareerRecommendations = () => {
     };
 
     fetchRecommendations();
-  }, [navigate, toast]);
+  }, [navigate, uiToast]);
 
   const viewRoadmap = (careerId: string) => {
     const selectedCareer = careers.find((career) => career.title === careerId);
@@ -154,7 +156,7 @@ const CareerRecommendations = () => {
       
       const currentDate = new Date();
       const pastDate = new Date();
-      pastDate.setDate(currentDate.getDate() - 7);
+      pastDate.setDate(currentDate.getDate() - 3);
       const formattedPastDate = pastDate.toISOString().split('T')[0];
       
       let url;
@@ -207,10 +209,28 @@ const CareerRecommendations = () => {
     } catch (error) {
       console.warn("API fetch failed, using fallback data:", error);
       
+      const fallbackTimestamp = new Date().toISOString();
+      
+      const getFallbackData = (data) => {
+        return data.map((item, index) => {
+          const currentDate = new Date();
+          const itemDate = new Date(currentDate);
+          itemDate.setDate(currentDate.getDate() - (data.length - index) + 1);
+          
+          return {
+            ...item,
+            _fallback: true,
+            originalDate: item.publishedAt,
+            publishedAt: itemDate.toISOString().split('T')[0],
+            retrievedAt: fallbackTimestamp
+          };
+        });
+      };
+      
       if (category === "all") {
-        return fallbackNews;
+        return getFallbackData(fallbackNews);
       } else {
-        return categoryNewsMap[category] || fallbackNews;
+        return getFallbackData(categoryNewsMap[category] || fallbackNews);
       }
     }
   };
@@ -244,7 +264,7 @@ const CareerRecommendations = () => {
     {
       id: 1,
       title: "New Education Policy Implementation Across Universities",
-      publishedAt: "2024-10-18",
+      publishedAt: "2025-04-19",
       source: { name: "Education Today" },
       content: "The Ministry of Education has announced full implementation of the National Education Policy across all universities starting next academic year. The policy aims to transform the educational landscape with flexible degree options and multidisciplinary approach.",
       url: "#",
@@ -253,7 +273,7 @@ const CareerRecommendations = () => {
     {
       id: 2,
       title: "Digital Learning Platforms See 200% Growth Post-Pandemic",
-      publishedAt: "2024-10-17",
+      publishedAt: "2025-04-18",
       source: { name: "EdTech Review" },
       content: "Online education platforms have reported continued growth even after the pandemic restrictions were lifted. Students are increasingly preferring hybrid learning models that combine classroom and digital instruction.",
       url: "#",
@@ -262,7 +282,7 @@ const CareerRecommendations = () => {
     {
       id: 3,
       title: "Top Universities Announce Scholarship Programs for Rural Students",
-      publishedAt: "2024-10-14",
+      publishedAt: "2025-04-17",
       source: { name: "Higher Education Chronicle" },
       content: "Leading universities have collectively announced scholarship programs aimed specifically at students from rural backgrounds to increase diversity and provide equal opportunities in higher education.",
       url: "#",
@@ -271,7 +291,7 @@ const CareerRecommendations = () => {
     {
       id: 4,
       title: "Global Education Summit to be Held in New Delhi Next Month",
-      publishedAt: "2024-10-12",
+      publishedAt: "2025-04-16",
       source: { name: "International Education News" },
       content: "New Delhi will host the Global Education Summit bringing together education ministers and policy experts from over 50 countries to discuss the future of education and international collaboration.",
       url: "#",
@@ -282,17 +302,17 @@ const CareerRecommendations = () => {
   const examNews = [
     {
       id: 1,
-      title: "NEET 2025 Registration Opens Next Week",
-      publishedAt: "2025-04-10",
+      title: "NEET 2025 Registration Opens Today",
+      publishedAt: "2025-04-20",
       source: { name: "Education Times" },
-      content: "The National Testing Agency has announced that NEET 2025 registrations will begin next week. Students planning to appear for the medical entrance exam should prepare their documents.",
+      content: "The National Testing Agency has announced that NEET 2025 registrations begin today. Students planning to appear for the medical entrance exam should prepare their documents and start the application process.",
       url: "#",
       category: "Exams"
     },
     {
       id: 2,
       title: "JEE Main 2025 to be Conducted in Four Sessions",
-      publishedAt: "2025-04-07",
+      publishedAt: "2025-04-19",
       source: { name: "Education Ministry" },
       content: "The Ministry of Education has announced that JEE Main 2025 will be conducted in four sessions to give multiple opportunities to candidates and avoid clash with board exams.",
       url: "#",
@@ -301,7 +321,7 @@ const CareerRecommendations = () => {
     {
       id: 3,
       title: "CAT 2025 Registration Deadline Extended",
-      publishedAt: "2025-04-05",
+      publishedAt: "2025-04-18",
       source: { name: "IIM Bangalore" },
       content: "IIM Bangalore, the conducting body for CAT 2025, has extended the registration deadline by one week due to technical issues faced by candidates.",
       url: "#",
@@ -310,7 +330,7 @@ const CareerRecommendations = () => {
     {
       id: 4,
       title: "GATE 2025 Exam Pattern Changes Announced",
-      publishedAt: "2025-04-02",
+      publishedAt: "2025-04-17",
       source: { name: "IIT Delhi" },
       content: "IIT Delhi has announced significant changes to the GATE 2025 exam pattern, including the introduction of new subjects and modifications to the marking scheme.",
       url: "#",
@@ -319,7 +339,7 @@ const CareerRecommendations = () => {
     {
       id: 5,
       title: "UPSC Civil Services 2025 Notification Released",
-      publishedAt: "2025-04-01",
+      publishedAt: "2025-04-16",
       source: { name: "UPSC" },
       content: "The Union Public Service Commission has released the notification for Civil Services Examination 2025. The preliminary exam is scheduled for June 2025.",
       url: "#",
@@ -327,10 +347,10 @@ const CareerRecommendations = () => {
     },
     {
       id: 6,
-      title: "SSC CGL 2025 Registration to Begin in May",
-      publishedAt: "2025-03-28",
+      title: "SSC CGL 2025 Registration to Begin Next Week",
+      publishedAt: "2025-04-15",
       source: { name: "Staff Selection Commission" },
-      content: "The Staff Selection Commission has announced that registrations for the Combined Graduate Level Examination 2025 will begin in May, with the tier-1 exam scheduled for August.",
+      content: "The Staff Selection Commission has announced that registrations for the Combined Graduate Level Examination 2025 will begin next week, with the tier-1 exam scheduled for August.",
       url: "#",
       category: "Exams"
     }
@@ -340,7 +360,7 @@ const CareerRecommendations = () => {
     {
       id: 1,
       title: "AI and Machine Learning Jobs See 300% Growth in Demand",
-      publishedAt: "2025-04-09",
+      publishedAt: "2025-04-19",
       source: { name: "Career Insights" },
       content: "The demand for professionals skilled in artificial intelligence and machine learning has tripled over the past year, with companies across sectors looking to implement AI solutions.",
       url: "#",
@@ -349,7 +369,7 @@ const CareerRecommendations = () => {
     {
       id: 2,
       title: "Government Announces 50,000 New Positions in Civil Services",
-      publishedAt: "2025-04-06",
+      publishedAt: "2025-04-18",
       source: { name: "Public Sector Career News" },
       content: "The central government has announced plans to create 50,000 new positions across various civil service departments in the next fiscal year, creating significant opportunities for UPSC aspirants.",
       url: "#",
@@ -358,7 +378,7 @@ const CareerRecommendations = () => {
     {
       id: 3,
       title: "Remote Work Opportunities Continue to Expand in Tech Industry",
-      publishedAt: "2025-04-04",
+      publishedAt: "2025-04-17",
       source: { name: "Tech Careers Today" },
       content: "Major tech companies are maintaining and expanding their remote work policies, opening up opportunities for professionals regardless of geographical location.",
       url: "#",
@@ -367,7 +387,7 @@ const CareerRecommendations = () => {
     {
       id: 4,
       title: "Healthcare Sector to Create 1 Million New Jobs by 2026",
-      publishedAt: "2025-03-30",
+      publishedAt: "2025-04-16",
       source: { name: "Healthcare Career Network" },
       content: "The healthcare industry is projected to create over one million new jobs in the next two years, with particular demand for nursing, mental health, and telehealth professionals.",
       url: "#",
@@ -376,7 +396,7 @@ const CareerRecommendations = () => {
     {
       id: 5,
       title: "Railway Recruitment Board Announces Largest Hiring Drive",
-      publishedAt: "2025-03-27",
+      publishedAt: "2025-04-15",
       source: { name: "Government Jobs Portal" },
       content: "The Railway Recruitment Board has announced its largest hiring drive in a decade, with plans to fill over 35,000 positions across various categories in the coming months.",
       url: "#",
@@ -397,12 +417,12 @@ const CareerRecommendations = () => {
     "Career": careerNews
   };
 
-  const { data: newsArticles, isLoading: newsLoading, isError, refetch } = useQuery({
+  const { data: newsArticles, isLoading, isError, refetch } = useQuery({
     queryKey: ['examNews', newsCategory, lastFetchTime],
     queryFn: () => fetchLatestNews(newsCategory),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 15,
+    refetchInterval: 1000 * 60 * 10,
   });
 
   useEffect(() => {
@@ -410,10 +430,18 @@ const CareerRecommendations = () => {
   }, [newsCategory, refetch]);
 
   useEffect(() => {
+    if (newsArticles && newsArticles.length > 0 && newsArticles[0]._fallback) {
+      setShowFallbackNotice(true);
+    } else {
+      setShowFallbackNotice(false);
+    }
+  }, [newsArticles]);
+
+  useEffect(() => {
     const intervalId = setInterval(() => {
       setLastFetchTime(new Date());
       console.log("Auto-refreshing news...");
-    }, 1000 * 60 * 60);
+    }, 1000 * 60 * 30);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -447,6 +475,12 @@ const CareerRecommendations = () => {
 
   const displayedNews = newsArticles || 
     (newsCategory === "all" ? fallbackNews : categoryNewsMap[newsCategory] || fallbackNews);
+
+  const handleRefresh = () => {
+    setLastFetchTime(new Date());
+    uiToast.info("Refreshing latest news...");
+    refetch();
+  };
 
   return (
     <div className="container mx-auto py-10 px-4">
@@ -637,6 +671,140 @@ const CareerRecommendations = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        <div className="mt-10">
+          <Card className="card-shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center">
+                  Latest Education & Career News
+                  {isError && <AlertCircle className="ml-2 h-5 w-5 text-destructive" />}
+                </CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  className="flex items-center gap-1"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="hidden sm:inline">Refresh</span>
+                </Button>
+              </div>
+              <div className="w-full">
+                <Tabs defaultValue="all" onValueChange={setNewsCategory}>
+                  <TabsList className="grid grid-cols-4 w-full">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="Education">Education</TabsTrigger>
+                    <TabsTrigger value="Exams">Exams</TabsTrigger>
+                    <TabsTrigger value="Career">Career</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {showFallbackNotice && (
+                <Alert variant="warning" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Using Cached News</AlertTitle>
+                  <AlertDescription>
+                    We're currently showing locally stored news. The dates shown are simulated for better readability.
+                    <Button variant="link" onClick={handleRefresh} className="p-0 h-auto text-xs underline">
+                      Try refreshing again
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {isError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>
+                    Could not load the latest news from our provider. Showing stored news instead.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <ScrollArea className="h-96 w-full pr-4">
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {Array(5).fill(0).map((_, i) => (
+                      <div key={i} className="border-b pb-3 last:border-b-0 animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/3 mb-2"></div>
+                        <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {displayedNews && displayedNews.length > 0 ? (
+                      displayedNews.map((item: any, index: number) => (
+                        <div key={index} className="border-b pb-3 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-900 p-2 rounded-md transition-colors">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-1 p-1 bg-blue-100 dark:bg-blue-900 rounded">
+                              {getNewsCategoryIcon(item.category || "All")}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium hover:text-blue-600 transition-colors">
+                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                  {item.title}
+                                </a>
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(item.publishedAt)} • {item.source.name} 
+                                {item.category && <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{item.category}</span>}
+                                {item._fallback && <span className="ml-1 text-amber-600">•</span>}
+                              </p>
+                              <p className="text-sm mt-1 line-clamp-2">
+                                {item.content?.split(" ").slice(0, 20).join(" ")}...
+                              </p>
+                              <div className="mt-2">
+                                <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800">
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                                    Read more <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <p>No news found for the selected category.</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleRefresh}
+                          className="mt-2"
+                        >
+                          Refresh News
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mt-6">
+                  <Separator className="my-4" />
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      News data automatically refreshes every 10 minutes. Last updated: {new Date().toLocaleTimeString()}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={handleRefresh}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" /> Refresh News Now
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="mt-10 text-center">
           <p className="mb-4 text-career-gray">Want to explore more options?</p>

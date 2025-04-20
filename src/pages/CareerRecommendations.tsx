@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,42 +44,56 @@ const CareerRecommendations = () => {
     }
 
     // Get career recommendations based on user profile
-    try {
-      const profile = JSON.parse(userProfile);
-      console.log("User profile:", profile);
-      
-      // Add username to profile if available
-      if (currentUser && currentUser.name) {
-        profile.name = currentUser.name;
-      }
-      
-      // Simulate ML processing delay
-      setTimeout(async () => {
-        // Get recommendations
-        const recommendations = getCareerRecommendations(profile);
+    const fetchRecommendations = async () => {
+      try {
+        const profile = JSON.parse(userProfile);
+        console.log("User profile:", profile);
         
-        // Only show top 5 recommendations for a better user experience
-        const topRecommendations = recommendations.slice(0, 5);
+        // Add username to profile if available
+        if (currentUser && currentUser.name) {
+          profile.name = currentUser.name;
+        }
         
-        // Process large dataset if needed
-        const processedRecommendations = await loadLargeDataset(topRecommendations);
-        setCareers(processedRecommendations);
-        
-        // Generate analysis from recommendations
-        const insightAnalysis = analyzeRecommendations(processedRecommendations);
-        setAnalysis(insightAnalysis);
-        
+        // Simulate ML processing delay
+        setTimeout(async () => {
+          try {
+            // Get recommendations - now properly awaiting the Promise
+            const recommendations = await getCareerRecommendations(profile);
+            
+            // Only show top 5 recommendations for a better user experience
+            const topRecommendations = recommendations.slice(0, 5);
+            
+            // Process large dataset if needed
+            const processedRecommendations = await loadLargeDataset(topRecommendations);
+            setCareers(processedRecommendations);
+            
+            // Generate analysis from recommendations
+            const insightAnalysis = analyzeRecommendations(processedRecommendations);
+            setAnalysis(insightAnalysis);
+            
+            setIsLoading(false);
+          } catch (error) {
+            console.error("Error processing recommendations:", error);
+            toast({
+              title: "Error",
+              description: "There was a problem generating your recommendations.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+          }
+        }, 1500);
+      } catch (error) {
+        console.error("Error processing recommendations:", error);
+        toast({
+          title: "Error",
+          description: "There was a problem generating your recommendations.",
+          variant: "destructive",
+        });
         setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      console.error("Error processing recommendations:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem generating your recommendations.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
+      }
+    };
+
+    fetchRecommendations();
   }, [navigate, toast]);
 
   const viewRoadmap = (careerId: string) => {
